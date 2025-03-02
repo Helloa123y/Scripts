@@ -621,6 +621,7 @@ Gui.Main.Scam.Scam.Button.MouseButton1Click:Connect(function()
 			end
 			Character.Humanoid.PlatformStand = true
 			while Wait do
+				JumpRemote:FireServer()
 				Height = Lerp(Height, 100000000, 0.0000001)
 				for i = 0 , 10 do 
 					Root.CFrame = TpCFrame * CFrame.new(Vector3.new(0,Height,0))
