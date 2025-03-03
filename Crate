@@ -1,0 +1,1546 @@
+-- Decompiler will be improved soon!
+-- Decompiled with Konstant V2.1, a fast Luau decompiler made in Luau by plusgiant5 (https://discord.gg/wyButjTMhM)
+-- Decompiled on 2025-03-02 17:45:50
+-- Luau version 6, Types version 3
+-- Time taken: 0.137568 seconds
+
+-- KONSTANTERROR: [0] 1. Error Block 300 start (CF ANALYSIS FAILED)
+local Players_upvr = game:GetService("Players")
+local TweenService_upvr_2 = game:GetService("TweenService")
+local HttpService_2 = game:GetService("HttpService")
+local GuiService = game:GetService("GuiService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+GuiService.TouchControlsEnabled = false
+GuiService.AutoSelectGuiEnabled = false
+game:GetService("StarterGui"):SetCoreGuiEnabled(Enum.CoreGuiType.All, false)
+local LocalPlayer_upvr = game.Players.LocalPlayer
+local var321_upvw = 0
+local var322_upvw = false
+local _1_upvr_2 = ReplicatedStorage.Events.GetIndex:InvokeServer()[1]
+local Pages_upvr = script.Parent.Pages
+local InventoryList_upvr_2 = Pages_upvr.Inventory.InventoryList
+local Percent_upvr = Pages_upvr.Cases.Percent
+local NumberValue_upvr = Instance.new("NumberValue")
+local any_GenerateGUID_result1 = HttpService_2:GenerateGUID()
+local var330_upvw = false
+inventoryPage = Pages_upvr.Inventory -- Setting global
+itemShopPage = Pages_upvr.ItemShop -- Setting global
+DailyRewardsPage = Pages_upvr.DailyRewards -- Setting global
+caseBattlePage = Pages_upvr.CasesBattles -- Setting global
+codePage = Pages_upvr.Codes -- Setting global
+chatEvent = ReplicatedStorage.Events.SendChat -- Setting global
+local tbl_19_upvr = {}
+script.Parent.Events.ReplicateIndex.OnInvoke = function() -- Line 1
+	--[[ Upvalues[1]:
+		[1]: _1_upvr_2 (readonly)
+	]]
+	script.Parent.Events.ReplicateIndex:Destroy()
+	return _1_upvr_2
+end
+ReplicatedStorage.Events.GetIndex:Destroy()
+ReplicatedStorage.Events.GetShopListing:Destroy()
+local Sounds_upvr = script.Parent.Sounds
+Sounds_upvr.Name = any_GenerateGUID_result1
+game.StarterGui.GameFrame:Destroy()
+game.StarterGui.GameLoading:Destroy()
+script.Parent.Name = any_GenerateGUID_result1
+script.Parent.Parent.Name = any_GenerateGUID_result1
+local Simple_upvr = require(ReplicatedStorage.Modules.Simple)
+local Funcs_upvr_2 = require(script.Funcs)
+Funcs_upvr_2.soundsFile = Sounds_upvr
+Funcs_upvr_2.Index = _1_upvr_2
+local SellItem_upvr = ReplicatedStorage.Events.SellItem
+freeCasesOpenedLocal = 0 -- Setting global
+local tbl_upvr = {
+	SettingsFolder = Instance.new("Folder", LocalPlayer_upvr);
+}
+tbl_upvr.SettingsFolder.Name = "Settings"
+tbl_upvr.MusicEnabled = Instance.new("BoolValue", tbl_upvr.SettingsFolder)
+tbl_upvr.MusicEnabled.Name = "MusicEnabled"
+tbl_upvr.MusicEnabled.Value = true
+tbl_upvr.RealOddsDisplay = Instance.new("BoolValue", tbl_upvr.SettingsFolder)
+tbl_upvr.RealOddsDisplay.Name = "RealOddsDisplay"
+tbl_upvr.RealOddsDisplay.Value = false
+tbl_upvr.AutoOpenBattles = Instance.new("BoolValue", tbl_upvr.SettingsFolder)
+tbl_upvr.AutoOpenBattles.Name = "AutoOpenBattles"
+tbl_upvr.AutoOpenBattles.Value = true
+tbl_upvr.HideLowPulls = Instance.new("BoolValue", tbl_upvr.SettingsFolder)
+tbl_upvr.HideLowPulls.Name = "HideLowPulls"
+tbl_upvr.HideLowPulls.Value = false
+tbl_upvr.SpinSound = Instance.new("BoolValue", tbl_upvr.SettingsFolder)
+tbl_upvr.SpinSound.Name = "SpinSound"
+tbl_upvr.SpinSound.Value = true
+tbl_upvr.MysteryUnboxing = Instance.new("BoolValue", tbl_upvr.SettingsFolder)
+tbl_upvr.MysteryUnboxing.Name = "MysteryUnboxing"
+tbl_upvr.MysteryUnboxing.Value = false
+local Balance_Frame = script.Parent.CenterFrame.Top.InnerTop.Balance_Frame
+local Balance_upvr_2 = Balance_Frame.Balance
+Balance_Frame.Name = any_GenerateGUID_result1
+Balance_upvr_2.Name = any_GenerateGUID_result1
+tbl_upvr.MusicEnabled:GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+	--[[ Upvalues[2]:
+		[1]: tbl_upvr (readonly)
+		[2]: TweenService_upvr_2 (readonly)
+	]]
+	if tbl_upvr.MusicEnabled.Value == true then
+		TweenService_upvr_2:Create(game.SoundService.Theme, TweenInfo.new(1), {
+			Volume = 0.35;
+		}):Play()
+	else
+		TweenService_upvr_2:Create(game.SoundService.Theme, TweenInfo.new(1), {
+			Volume = 0;
+		}):Play()
+	end
+end)
+tbl_upvr.SpinSound:GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+	--[[ Upvalues[2]:
+		[1]: tbl_upvr (readonly)
+		[2]: TweenService_upvr_2 (readonly)
+	]]
+	if tbl_upvr.SpinSound.Value == true then
+		TweenService_upvr_2:Create(game.SoundService.SpinEffect, TweenInfo.new(1), {
+			Volume = 0.2;
+		}):Play()
+	else
+		TweenService_upvr_2:Create(game.SoundService.SpinEffect, TweenInfo.new(1), {
+			Volume = 0;
+		}):Play()
+	end
+end)
+local Normals_upvr_2 = ReplicatedStorage.Crates.Normals
+script.Parent.CenterFrame.Top.InnerTop.ProfileImage.Image = Funcs_upvr_2.getPlayerImage(LocalPlayer_upvr.UserId, 150)
+local ConfettiParticles_2 = require(script.ConfettiParticles)
+ConfettiParticles_2.setGravity(Vector2.new(0, 1))
+local tbl_40_upvr = {}
+local var349_upvw
+for _ = 1, 25 do
+	table.insert(tbl_40_upvr, ConfettiParticles_2.createParticle(Vector2.new(0.5, 1), Vector2.new(math.random(90) - 45, math.random(70, 100)), script.Parent.FullFrame, {Color3.fromRGB(255, 255, 100), Color3.fromRGB(255, 100, 100)}))
+end
+local tbl_50_upvw = {Color3.fromRGB(255, 255, 100), Color3.fromRGB(255, 100, 100)}
+local var352_upvw = false
+game:GetService("RunService").RenderStepped:Connect(function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: tbl_40_upvr (readonly)
+		[2]: tbl_50_upvw (read and write)
+		[3]: var352_upvw (read and write)
+	]]
+	for _, v in pairs(tbl_40_upvr) do
+		if tbl_50_upvw then
+			v:SetColors(tbl_50_upvw)
+		end
+		v.Enabled = var352_upvw
+		v:Update()
+	end
+end)
+local function _(arg1, arg2) -- Line 1
+	--[[ Upvalues[2]:
+		[1]: tbl_50_upvw (read and write)
+		[2]: var352_upvw (read and write)
+	]]
+	tbl_50_upvw = arg1
+	task.spawn(function() -- Line 1
+		--[[ Upvalues[2]:
+			[1]: var352_upvw (copied, read and write)
+			[2]: arg2 (readonly)
+		]]
+		var352_upvw = true
+		task.wait(arg2)
+		var352_upvw = false
+	end)
+end
+local CasesList_upvr = Pages_upvr.Cases.CasesList
+CasesList_upvr.Name = any_GenerateGUID_result1
+local var362_upvw = 1
+local function ab_upvr(arg1, arg2) -- Line 1, Named "ab"
+	local var363 = arg2.AbsoluteSize.X * 0.05
+	local var364 = arg2.AbsoluteSize.Y * 0.05
+	local var365 = false
+	if arg2.AbsolutePosition.X - var363 <= arg1.X then
+		if arg1.X > arg2.AbsolutePosition.X + arg2.AbsoluteSize.X + var363 then
+			var365 = false
+		else
+			var365 = true
+		end
+	end
+	local var366 = false
+	if arg2.AbsolutePosition.Y - var364 <= arg1.Y then
+		if arg1.Y > arg2.AbsolutePosition.Y + arg2.AbsoluteSize.Y + var364 then
+			var366 = false
+		else
+			var366 = true
+		end
+	end
+	return var365 and var366
+end
+local TopButtons_upvr = CasesList_upvr.Parent.TopButtons
+for _, v_2_upvr in ipairs(script.Parent.CenterFrame.Second.ButtonFrame:GetChildren()) do
+	local var371_upvw
+	if v_2_upvr:IsA("ImageButton") then
+		if v_2_upvr.DescriptionFrame:FindFirstChild("TextOverride") then
+			v_2_upvr.DescriptionFrame.HoverText.Text = v_2_upvr.DescriptionFrame.TextOverride.Value
+		else
+			v_2_upvr.DescriptionFrame.HoverText.Text = v_2_upvr.Name
+		end
+		v_2_upvr.MouseEnter:Connect(function() -- Line 1
+			--[[ Upvalues[1]:
+				[1]: v_2_upvr (readonly)
+			]]
+			v_2_upvr.Hover:Play()
+			v_2_upvr:TweenSize(UDim2.new(0.05, 0, 1.13, 0), "In", "Linear", 0.075, true)
+			v_2_upvr.DescriptionFrame:TweenSize(UDim2.new(3, 0, 0.696, 0), "Out", "Quint", 0.2, true)
+			v_2_upvr.DescriptionFrame.ZIndex = 112
+			v_2_upvr.DescriptionFrame.HoverText.ZIndex = 113
+		end)
+		v_2_upvr.MouseLeave:Connect(function() -- Line 1
+			--[[ Upvalues[1]:
+				[1]: v_2_upvr (readonly)
+			]]
+			v_2_upvr:TweenSize(UDim2.new(0.04, 0, 0.9, 0), "In", "Linear", 0.075, true)
+			v_2_upvr.DescriptionFrame:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quint", 0.2, true)
+			v_2_upvr.DescriptionFrame.ZIndex = 110
+			v_2_upvr.DescriptionFrame.HoverText.ZIndex = 111
+		end)
+		v_2_upvr.MouseButton1Down:Connect(function() -- Line 1
+			--[[ Upvalues[1]:
+				[1]: v_2_upvr (readonly)
+			]]
+			v_2_upvr.Hover:Play()
+			v_2_upvr:TweenSize(UDim2.new(0.031, 0, 0.81, 0), "Out", "Back", 0.075, true)
+		end)
+		v_2_upvr.MouseButton1Up:Connect(function() -- Line 1
+			--[[ Upvalues[1]:
+				[1]: v_2_upvr (readonly)
+			]]
+			v_2_upvr:TweenSize(UDim2.new(0.05, 0, 1, 0), "Out", "Back", 0.075, true)
+		end)
+		local any_GenerateGUID_result1_2_upvr = HttpService_2:GenerateGUID()
+		if Pages_upvr[v_2_upvr.Name].Name == "CasesBattles" then
+		end
+		if Pages_upvr[v_2_upvr.Name].Name == "Cases" then
+			Pages_upvr[v_2_upvr.Name].Name = any_GenerateGUID_result1_2_upvr
+			var371_upvw = any_GenerateGUID_result1_2_upvr
+		else
+			Pages_upvr[v_2_upvr.Name].Name = any_GenerateGUID_result1_2_upvr
+		end
+		local var378_upvw = false
+		local LevelRewards_upvr = Pages_upvr.LevelRewards
+		v_2_upvr.Activated:Connect(function() -- Line 1
+			--[[ Upvalues[7]:
+				[1]: v_2_upvr (readonly)
+				[2]: var378_upvw (read and write)
+				[3]: LevelRewards_upvr (readonly)
+				[4]: var362_upvw (read and write)
+				[5]: Pages_upvr (readonly)
+				[6]: var371_upvw (read and write)
+				[7]: any_GenerateGUID_result1_2_upvr (readonly)
+			]]
+			v_2_upvr.Click:Play()
+			if script.Parent.Opening.Value == false and not var378_upvw then
+				var378_upvw = true
+				script.Parent.Page.Value = v_2_upvr.Name
+				if v_2_upvr.Name == "LevelRewards" and not LevelRewards_upvr.LevelPathHeader.LevelPath:FindFirstChild("NewBlankFrame") then
+					local Frame_2 = Instance.new("Frame", LevelRewards_upvr.LevelPathHeader.LevelPath)
+					Frame_2.Name = "NewBlankFrame"
+					Frame_2.Size = UDim2.new(0.1, 0, 0.1, 0)
+					Frame_2.LayoutOrder = 100000
+					Frame_2.BackgroundTransparency = 1
+				end
+				local LayoutOrder_4 = v_2_upvr.LayoutOrder
+				if var362_upvw < LayoutOrder_4 then
+					Pages_upvr[var371_upvw]:TweenPosition(UDim2.new(-0.5, 0, 0.5, 0), "In", "Linear", 0.2, true)
+					Pages_upvr[any_GenerateGUID_result1_2_upvr].Position = UDim2.new(1.5, 0, 0.5, 0)
+					Pages_upvr[any_GenerateGUID_result1_2_upvr].Visible = true
+					Pages_upvr[any_GenerateGUID_result1_2_upvr]:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "In", "Linear", 0.2, true)
+				elseif LayoutOrder_4 < var362_upvw then
+					Pages_upvr[var371_upvw]:TweenPosition(UDim2.new(1.5, 0, 0.5, 0), "In", "Linear", 0.2, true)
+					Pages_upvr[any_GenerateGUID_result1_2_upvr].Position = UDim2.new(-0.5, 0, 0.5, 0)
+					Pages_upvr[any_GenerateGUID_result1_2_upvr].Visible = true
+					Pages_upvr[any_GenerateGUID_result1_2_upvr]:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "In", "Linear", 0.2, true)
+				end
+				var362_upvw = v_2_upvr.LayoutOrder
+				var371_upvw = any_GenerateGUID_result1_2_upvr
+				task.wait(0.05)
+				var378_upvw = false
+			end
+		end)
+		if v_2_upvr.Name == "DailyRewards" then
+			local Debris_upvr_2 = game:GetService("Debris")
+			local var384_upvw = false
+			script.Parent.GroupReward.CheckB.Activated:Connect(function() -- Line 1
+				--[[ Upvalues[8]:
+					[1]: Sounds_upvr (readonly)
+					[2]: Debris_upvr_2 (readonly)
+					[3]: var384_upvw (read and write)
+					[4]: v_2_upvr (readonly)
+					[5]: var362_upvw (read and write)
+					[6]: Pages_upvr (readonly)
+					[7]: var371_upvw (read and write)
+					[8]: any_GenerateGUID_result1_2_upvr (readonly)
+				]]
+				Sounds_upvr.Click1:Play()
+				script.Parent.GroupReward:TweenPosition(UDim2.new(0.5, 0, 1.5, 0), "In", "Quint", 0.4, true)
+				Debris_upvr_2:AddItem(script.Parent.GroupReward, 0.45)
+				if not var384_upvw then
+					var384_upvw = true
+					script.Parent.Page.Value = v_2_upvr.Name
+					local LayoutOrder_2 = v_2_upvr.LayoutOrder
+					if var362_upvw < LayoutOrder_2 then
+						Pages_upvr[var371_upvw]:TweenPosition(UDim2.new(-0.5, 0, 0.5, 0), "In", "Linear", 0.2, true)
+						Pages_upvr[any_GenerateGUID_result1_2_upvr].Position = UDim2.new(1.5, 0, 0.5, 0)
+						Pages_upvr[any_GenerateGUID_result1_2_upvr].Visible = true
+						Pages_upvr[any_GenerateGUID_result1_2_upvr]:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "In", "Linear", 0.2, true)
+					elseif LayoutOrder_2 < var362_upvw then
+						Pages_upvr[var371_upvw]:TweenPosition(UDim2.new(1.5, 0, 0.5, 0), "In", "Linear", 0.2, true)
+						Pages_upvr[any_GenerateGUID_result1_2_upvr].Position = UDim2.new(-0.5, 0, 0.5, 0)
+						Pages_upvr[any_GenerateGUID_result1_2_upvr].Visible = true
+						Pages_upvr[any_GenerateGUID_result1_2_upvr]:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "In", "Linear", 0.2, true)
+					end
+					var362_upvw = v_2_upvr.LayoutOrder
+					var371_upvw = any_GenerateGUID_result1_2_upvr
+					task.wait(1)
+					var384_upvw = false
+				end
+			end)
+		end
+	end
+end
+local BigCaseBattleFrame_upvr_2 = script.Parent.BigCaseBattleFrame
+local BigCaseBattle_upvr = ReplicatedStorage.SpecialEvents.BigCaseBattle
+local function _(arg1, arg2, arg3) -- Line 1, Named "at"
+	--[[ Upvalues[7]:
+		[1]: BigCaseBattleFrame_upvr_2 (readonly)
+		[2]: Funcs_upvr_2 (readonly)
+		[3]: BigCaseBattle_upvr (readonly)
+		[4]: _1_upvr_2 (readonly)
+		[5]: Simple_upvr (readonly)
+		[6]: Normals_upvr_2 (readonly)
+		[7]: Sounds_upvr (readonly)
+	]]
+	-- KONSTANTWARNING: Variable analysis failed. Output will have some incorrect variable assignments
+	local CaseBattleFrameUnbox_upvr = BigCaseBattleFrame_upvr_2.CaseBattleFrameUnbox
+	local any_createRandomGenerator_result1_2 = Funcs_upvr_2.createRandomGenerator(BigCaseBattle_upvr:GetAttribute("Seed"), 65, 71)
+	CaseBattleFrameUnbox_upvr.WeaponsClipping.Scroller.Size = UDim2.new(0, 80 * CaseBattleFrameUnbox_upvr.WeaponsClipping.Scroller.AbsoluteSize.Y, 1, 0)
+	CaseBattleFrameUnbox_upvr.WeaponsClipping.Scroller.Position = UDim2.new(0, 0, 0, 0)
+	CaseBattleFrameUnbox_upvr.WeaponsClipping.Scroller:ClearAllChildren()
+	local var394_upvw
+	for i_4 = 1, any_createRandomGenerator_result1_2 + 7 do
+		local Frame_3 = Instance.new("Frame")
+		local ImageLabel = Instance.new("ImageLabel")
+		local TextLabel = Instance.new("TextLabel")
+		local TextLabel_3 = Instance.new("TextLabel")
+		local var399
+		if i_4 ~= any_createRandomGenerator_result1_2 then
+			var399 = Funcs_upvr_2.selectRandomFromWeightTable(arg1[1], arg1[2], BigCaseBattle_upvr:GetAttribute("Seed") + i_4 * 1250)
+		else
+			var394_upvw = Frame_3
+			var399 = arg2
+		end
+		local UIGradient_2 = Instance.new("UIGradient", Frame_3)
+		UIGradient_2.Rotation = 90
+		UIGradient_2.Color = Funcs_upvr_2.getGradientColors(var399).Color
+		ImageLabel.Name = "ItemImage"
+		ImageLabel.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=".._1_upvr_2[var399].ID.."&width=150&height=150&format=png"
+		Frame_3.Size = UDim2.new(0, CaseBattleFrameUnbox_upvr.WeaponsClipping.Scroller.AbsoluteSize.X / 80, 1, 0)
+		Frame_3.Position = UDim2.new(0, Frame_3.AbsoluteSize.X * (i_4 - 1), 0, 0)
+		ImageLabel.Size = UDim2.new(0.6, 0, 0.6, 0)
+		ImageLabel.Position = UDim2.new(0.5, 0, 0.377, 0)
+		ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+		ImageLabel.BackgroundTransparency = 1
+		TextLabel.AnchorPoint = Vector2.new(0.5, 1)
+		TextLabel_3.AnchorPoint = Vector2.new(0.5, 1)
+		TextLabel.Position = UDim2.new(0.5, 0, 0.95, 0)
+		TextLabel_3.Position = UDim2.new(0.5, 0, 0.8, 0)
+		TextLabel.Size = UDim2.new(0.7, 0, 0.125, 0)
+		TextLabel_3.Size = UDim2.new(0.7, 0, 0.125, 0)
+		TextLabel.TextScaled = true
+		TextLabel_3.TextScaled = true
+		TextLabel.Font = Enum.Font.FredokaOne
+		TextLabel_3.Font = Enum.Font.FredokaOne
+		TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		TextLabel_3.TextColor3 = Color3.fromRGB(114, 255, 142)
+		TextLabel.Text = tostring(arg2)
+		TextLabel_3.Text = "<stroke color=\"#494441\" joins=\"miter\" thickness=\"2\" transparency=\"0.5\">"..Simple_upvr.Format(_1_upvr_2[var399].Price).."$</stroke>"
+		TextLabel.BackgroundTransparency = 1
+		TextLabel_3.BackgroundTransparency = 1
+		TextLabel.ZIndex = 511
+		TextLabel.Parent = Frame_3
+		TextLabel_3.Parent = Frame_3
+		TextLabel_3.RichText = true
+		TextLabel.ZIndex = 511
+		TextLabel_3.ZIndex = 511
+		ImageLabel.ZIndex = 511
+		Frame_3.ZIndex = 510
+		Instance.new("UIAspectRatioConstraint", ImageLabel)
+		Frame_3.Parent = CaseBattleFrameUnbox_upvr.WeaponsClipping.Scroller
+		ImageLabel.Parent = Frame_3
+		if Funcs_upvr_2.browseDictionnary(arg1[1], var399).weight <= arg1[2] / 75 and Normals_upvr_2[arg3].Price.Value * 5 <= _1_upvr_2[var399].Price then
+			ImageLabel.Image = "rbxassetid://139843655532969"
+			ImageLabel.Position = UDim2.new(0.5, 0, 0.5, 0)
+			ImageLabel.Size = UDim2.new(0.8, 0, 0.8, 0)
+			TextLabel:Destroy()
+			TextLabel_3:Destroy()
+			UIGradient_2:Destroy()
+			BigCaseBattleFrame_upvr_2.Exclude.MythicGradient:Clone().Parent = Frame_3
+		end
+	end
+	task.wait(0.4)
+	local var401 = var394_upvw.AbsoluteSize.X / 2.2
+	local var402_upvr = var394_upvw.AbsolutePosition.X + var394_upvw.AbsoluteSize.X / 2 - CaseBattleFrameUnbox_upvr.Marker.AbsolutePosition.X
+	CaseBattleFrameUnbox_upvr.WeaponsClipping.Scroller:TweenPosition(UDim2.new(0, (-var402_upvr) + ((Funcs_upvr_2.createRandomGenerator(BigCaseBattle_upvr:GetAttribute("Seed"), 1, 100) - 1) / 99 * 2 * var401 - var401), 0, 0), "Out", "Quint", 4.5, true)
+	task.delay(4, function() -- Line 1
+		--[[ Upvalues[8]:
+			[1]: CaseBattleFrameUnbox_upvr (readonly)
+			[2]: var402_upvr (readonly)
+			[3]: var394_upvw (read and write)
+			[4]: Sounds_upvr (copied, readonly)
+			[5]: Funcs_upvr_2 (copied, readonly)
+			[6]: arg2 (readonly)
+			[7]: BigCaseBattle_upvr (copied, readonly)
+			[8]: arg3 (readonly)
+		]]
+		CaseBattleFrameUnbox_upvr.WeaponsClipping.Scroller:TweenPosition(UDim2.new(0, -var402_upvr, 0, 0), "Out", "Back", 0.2, true)
+		if var394_upvw.ItemImage.Image == "rbxassetid://139843655532969" then
+			var394_upvw.ItemImage:TweenSize(UDim2.new(2, 0, 2, 0), "In", "Back", 0.5, true)
+			Sounds_upvr.MythicSpin:Play()
+			task.wait(0.5)
+			var394_upvw.ItemImage:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true)
+			task.wait(0.3)
+			Funcs_upvr_2.clearAllSpecificElement(CaseBattleFrameUnbox_upvr.WeaponsClipping.Scroller, {"Frame"})
+			Funcs_upvr_2.createBigCBMythicSpin(CaseBattleFrameUnbox_upvr, arg2, BigCaseBattle_upvr:GetAttribute("Seed") * 20, arg3)
+		end
+	end)
+end
+any_GenerateGUID_result1_2_upvr = script.Parent.CenterFrame.Unboxed.ItemImage
+TweenService_upvr_2:Create(any_GenerateGUID_result1_2_upvr, TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+	Position = UDim2.new(0.5, 0, 0.3, 0);
+}):Play()
+any_GenerateGUID_result1_2_upvr = {}
+local var406 = any_GenerateGUID_result1_2_upvr
+var406.NewCasesLabel = {"Omega Case", "Demon Case", "5% Fedora Case", "Noob Case", "1% Afonso Case"}
+var406.TenPercentsCasesLabel = {"10% Fedora Case", "Stylish Case", "10% Bombastic Case", "Budget 10% Case", "10% Sparkle Time Case", "Shutdown Case", "Risk Case", "Skeleton Case", "Chess Case", "Coconut Case", "Hunting Case", "Burger Case", "10% Silver Case", "Password Case", "Baguette Case", "Certified Case", "Target Case", "Meal Case", "Boxing Case", "Birthday Case", "Kiwi Case", "Strawberry Case", "Broom Case", "Fossil Case", "10% Emerald Case", "Tree Case", "8-Bit Case"}
+var406.FivePercentsCasesLabel = {"5% Flimsy Case", "5% Periastron Case", "5% Fedora Case", "Problem Case", "Bell Case", "Alarm Case", "Gem Case", "Firefighter Case", "Combat Case", "Cartoon Case", "Coins Case", "5% Fedora Case"}
+var406.FiftyFiftyCasesLabel = {"Cloud Case", "Medium 50/50 Case", "50 50 Case", "Split Case", "Stabbed Case", "Robot Case", "Divided Case", "Coffee Case", "Trick Case", "Sword Case", "Watermelon Case", "Book Case", "Wallet Case", "Pasta Case", "Bill Case", "Astronomy Case", "Heart Case"}
+var406.SeventyPercentsLabel = {"70% Fedora Case", "70% Gold Case", "70% Gucci Case", "70% Sneakers Case", "70% Football Case"}
+var406.OnePercentLabel = {"Gas Case", "1% Thunder Case", "1% Overseer Case"}
+var406.PartnerCase = {"Navashy Case", "EBT Case", "SunMay Case", "1% Afonso Case"}
+for _, v_3_upvr in ipairs(TopButtons_upvr:GetChildren()) do
+	if v_3_upvr:IsA("TextButton") then
+		Funcs_upvr_2.animateButton(v_3_upvr, 0.95, 1.08)
+		local var418_upvw = false
+		local const_string_upvw_2 = ""
+		local var420_upvw = false
+		v_3_upvr.Activated:Connect(function() -- Line 1
+			--[[ Upvalues[5]:
+				[1]: var418_upvw (read and write)
+				[2]: v_3_upvr (readonly)
+				[3]: const_string_upvw_2 (read and write)
+				[4]: TopButtons_upvr (readonly)
+				[5]: var420_upvw (read and write)
+			]]
+			-- KONSTANTERROR: [115] 82. Error Block 19 start (CF ANALYSIS FAILED)
+			task.wait(0.1)
+			var418_upvw = false
+			-- KONSTANTERROR: [115] 82. Error Block 19 end (CF ANALYSIS FAILED)
+			-- KONSTANTERROR: [0] 1. Error Block 33 start (CF ANALYSIS FAILED)
+			-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+			if not false then
+				-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+				if false ~= "Oddview" then
+					-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+					-- KONSTANTWARNING: Failed to evaluate expression, replaced with nil [120.65666]
+					if false == 0.1 then
+						-- KONSTANTWARNING: GOTO [115] #82
+					end
+					-- KONSTANTWARNING: GOTO [28] #22
+				end
+				-- KONSTANTWARNING: GOTO [87] #61
+			end
+			-- KONSTANTERROR: [0] 1. Error Block 33 end (CF ANALYSIS FAILED)
+			-- KONSTANTERROR: [121] 87. Error Block 20 start (CF ANALYSIS FAILED)
+			-- KONSTANTERROR: [121] 87. Error Block 20 end (CF ANALYSIS FAILED)
+		end)
+	end
+end
+local GiveawaysTopper_upvr = script.Parent.GiveawaysTopper
+local var423_upvw = false
+local JoinGiveaway_upvr = ReplicatedStorage.Events.Misc.JoinGiveaway
+ReplicatedStorage.Giveaways.ChildAdded:Connect(function(arg1) -- Line 1
+	--[[ Upvalues[8]:
+		[1]: GiveawaysTopper_upvr (readonly)
+		[2]: _1_upvr_2 (readonly)
+		[3]: LocalPlayer_upvr (readonly)
+		[4]: var423_upvw (read and write)
+		[5]: JoinGiveaway_upvr (readonly)
+		[6]: Players_upvr (readonly)
+		[7]: Funcs_upvr_2 (readonly)
+		[8]: Debris_upvr_2 (readonly)
+	]]
+	arg1:WaitForChild("Participants")
+	local clone_9_upvr = GiveawaysTopper_upvr.Ressources.Template:Clone()
+	clone_9_upvr.Parent = GiveawaysTopper_upvr
+	clone_9_upvr.Title.Text = "Giveaway #"..arg1.Name
+	clone_9_upvr.Giveaway.Value = arg1
+	clone_9_upvr.PrizeT.Text = arg1.Prize.Value.." (".._1_upvr_2[arg1.Prize.Value].Price.."$)"
+	clone_9_upvr.PrizeImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId="..tostring(_1_upvr_2[arg1.Prize.Value].ID).."&width=150&height=150&format=png"
+	local tbl_46_upvr = {}
+	if arg1.IsVip.Value == true then
+		clone_9_upvr.VIPStroke.Enabled = true
+		clone_9_upvr.Title.Text = "VIP Giveaway #"..arg1.Name
+		if LocalPlayer_upvr.VIP.Value == false then
+			clone_9_upvr.VIPText.Visible = true
+			clone_9_upvr.JoinGiveaway.Visible = false
+		else
+			clone_9_upvr.VIPText.Visible = false
+			if not arg1.Participants:FindFirstChild(LocalPlayer_upvr.Name) then
+				clone_9_upvr.JoinGiveaway.Visible = true
+			end
+		end
+	end
+	clone_9_upvr.Visible = true
+	clone_9_upvr:TweenSize(UDim2.new(1, 0, 0.325, 0), "Out", "Quint", 0.4, true)
+	local any_Connect_result1_upvr_5 = clone_9_upvr.JoinGiveaway.Activated:Connect(function() -- Line 1
+		--[[ Upvalues[3]:
+			[1]: var423_upvw (copied, read and write)
+			[2]: JoinGiveaway_upvr (copied, readonly)
+			[3]: arg1 (readonly)
+		]]
+		if not var423_upvw then
+			var423_upvw = true
+			JoinGiveaway_upvr:FireServer(arg1)
+			task.wait(1)
+			var423_upvw = false
+		end
+	end)
+	table.insert(tbl_46_upvr, any_Connect_result1_upvr_5)
+	table.insert(tbl_46_upvr, arg1.Participants.ChildAdded:Connect(function(arg1_3) -- Line 1
+		--[[ Upvalues[4]:
+			[1]: LocalPlayer_upvr (copied, readonly)
+			[2]: clone_9_upvr (readonly)
+			[3]: any_Connect_result1_upvr_5 (readonly)
+			[4]: arg1 (readonly)
+		]]
+		if arg1_3.Name == LocalPlayer_upvr.Name then
+			clone_9_upvr.JoinGiveaway.Visible = false
+			any_Connect_result1_upvr_5:Disconnect()
+			clone_9_upvr.JoinGiveaway:Destroy()
+		end
+		clone_9_upvr.Participants.Text = tostring(#arg1.Participants:GetChildren()).." Players"
+	end))
+	table.insert(tbl_46_upvr, arg1.Winner:GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+		--[[ Upvalues[3]:
+			[1]: arg1 (readonly)
+			[2]: clone_9_upvr (readonly)
+			[3]: Players_upvr (copied, readonly)
+		]]
+		if arg1.Winner.Value ~= "" then
+			clone_9_upvr.Participants.Text = "Winner: "..arg1.Winner.Value
+			if arg1.IsVip.Value == true then
+				clone_9_upvr.Participants.Text = "Winner: "..arg1.Winner.Value.." 👑"
+				clone_9_upvr.Participants.TextColor3 = Color3.fromRGB(255, 227, 124)
+			end
+			clone_9_upvr.WinnerImage.Image = Players_upvr:GetUserThumbnailAsync(Players_upvr:GetUserIdFromNameAsync(arg1.Winner.Value), Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+			clone_9_upvr.WinnerImage:TweenSize(UDim2.new(0.5, 0, 0.5, 0), "Out", "Quint", 0.2, true)
+		end
+	end))
+	table.insert(tbl_46_upvr, LocalPlayer_upvr:WaitForChild("VIP"):GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+		--[[ Upvalues[3]:
+			[1]: arg1 (readonly)
+			[2]: LocalPlayer_upvr (copied, readonly)
+			[3]: clone_9_upvr (readonly)
+		]]
+		if not arg1.Participants:FindFirstChild(LocalPlayer_upvr.Name) then
+			clone_9_upvr.JoinGiveaway.Visible = true
+		end
+	end))
+	table.insert(tbl_46_upvr, arg1.Countdown:GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+		--[[ Upvalues[3]:
+			[1]: clone_9_upvr (readonly)
+			[2]: Funcs_upvr_2 (copied, readonly)
+			[3]: arg1 (readonly)
+		]]
+		clone_9_upvr.Countdown.Text = Funcs_upvr_2.displayCountdown(arg1.Countdown.Value)
+	end))
+	arg1.Destroying:Once(function() -- Line 1
+		--[[ Upvalues[4]:
+			[1]: Funcs_upvr_2 (copied, readonly)
+			[2]: tbl_46_upvr (readonly)
+			[3]: clone_9_upvr (readonly)
+			[4]: Debris_upvr_2 (copied, readonly)
+		]]
+		Funcs_upvr_2.clearConnections(tbl_46_upvr)
+		clone_9_upvr:TweenSize(UDim2.new(0, 0, 0, 0), "Out", "Quint", 0.25, true)
+		Debris_upvr_2:AddItem(clone_9_upvr, 0.25)
+	end)
+end)
+LocalPlayer_upvr:WaitForChild("Frame")
+local CaseMoney_upvr = LocalPlayer_upvr:WaitForChild("CaseMoney")
+CaseMoney_upvr.Name = any_GenerateGUID_result1
+local InvValue_upvr_2 = LocalPlayer_upvr:WaitForChild("InvValue")
+InvValue_upvr_2.Name = any_GenerateGUID_result1
+task.spawn(function() -- Line 1
+	--[[ Upvalues[2]:
+		[1]: var330_upvw (read and write)
+		[2]: LocalPlayer_upvr (readonly)
+	]]
+	repeat
+		task.wait(0.05)
+	until var330_upvw ~= true or LocalPlayer_upvr:FindFirstChild("NCC")
+	if LocalPlayer_upvr:WaitForChild("NCC").Value == false then
+		script.Parent.CommunityGoalPopUp.Size = UDim2.new(0, 0, 0, 0)
+		script.Parent.CommunityGoalPopUp.Visible = true
+		script.Parent.CommunityGoalPopUp:TweenSize(UDim2.new(0.225, 0, 0.5, 0), "Out", "Quint", 0.4, true)
+	else
+		script.Parent.CommunityGoalPopUp:Destroy()
+		if not LocalPlayer_upvr:IsInGroup(15553867) then
+			script.Parent.GroupReward:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "Out", "Quint", 0.4, true)
+			return
+		end
+		script.Parent.GroupReward:Destroy()
+	end
+end)
+local var438_upvw = false
+script.Parent.CommunityGoalPopUp.Close.Activated:Connect(function() -- Line 1
+	--[[ Upvalues[2]:
+		[1]: var438_upvw (read and write)
+		[2]: LocalPlayer_upvr (readonly)
+	]]
+	if not var438_upvw then
+		var438_upvw = true
+		task.delay(0.4, function() -- Line 1
+			--[[ Upvalues[1]:
+				[1]: LocalPlayer_upvr (copied, readonly)
+			]]
+			if not LocalPlayer_upvr:IsInGroup(15553867) then
+				script.Parent.GroupReward:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "Out", "Quint", 0.4, true)
+			end
+		end)
+		task.wait(0.2)
+		var438_upvw = false
+	end
+end)
+Funcs_upvr_2.animateButton(script.Parent.GroupReward.LeaveB, 0.9, 1.1)
+local var441_upvw = false
+script.Parent.GroupReward.LeaveB.Activated:Connect(function() -- Line 1
+	--[[ Upvalues[1]:
+		[1]: var441_upvw (read and write)
+	]]
+	if not var441_upvw then
+		var441_upvw = true
+		script.Parent.GroupReward:TweenPosition(UDim2.new(0.5, 0, 1.5, 0), "In", "Quint", 0.4, true)
+		task.wait(1)
+		var441_upvw = false
+	end
+end)
+Funcs_upvr_2.animateButton(script.Parent.GroupReward.CheckB, 0.9, 1.1)
+LocalPlayer_upvr.PlayerScripts.FinishLoading.Event:Once(function() -- Line 1
+	--[[ Upvalues[2]:
+		[1]: var330_upvw (read and write)
+		[2]: LocalPlayer_upvr (readonly)
+	]]
+	var330_upvw = true
+	LocalPlayer_upvr.PlayerScripts.FinishLoading:Destroy()
+end)
+if not game.ReplicatedFirst:FindFirstChild("GameLoading") then
+	game.ReplicatedFirst.ChildRemoved:Connect(function(arg1) -- Line 1
+		--[[ Upvalues[1]:
+			[1]: var330_upvw (read and write)
+		]]
+		if arg1.Name == "GameLoading" then
+			var330_upvw = true
+		end
+	end):Disconnect()
+	var330_upvw = true
+end
+NumberValue_upvr:GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: Balance_upvr_2 (readonly)
+		[2]: Funcs_upvr_2 (readonly)
+		[3]: NumberValue_upvr (readonly)
+	]]
+	Balance_upvr_2.Text = Funcs_upvr_2.roundNumber(NumberValue_upvr.Value, 2)..'$'
+end)
+task.delay(1, function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: TweenService_upvr_2 (readonly)
+		[2]: NumberValue_upvr (readonly)
+		[3]: CaseMoney_upvr (readonly)
+	]]
+	TweenService_upvr_2:Create(NumberValue_upvr, TweenInfo.new(1), {
+		Value = CaseMoney_upvr.Value;
+	}):Play()
+end)
+CaseMoney_upvr:GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: TweenService_upvr_2 (readonly)
+		[2]: NumberValue_upvr (readonly)
+		[3]: CaseMoney_upvr (readonly)
+	]]
+	TweenService_upvr_2:Create(NumberValue_upvr, TweenInfo.new(1), {
+		Value = CaseMoney_upvr.Value;
+	}):Play()
+end)
+local var449_upvw = false
+function UpdateInventory() -- Line 1
+	--[[ Upvalues[8]:
+		[1]: LocalPlayer_upvr (readonly)
+		[2]: InventoryList_upvr_2 (readonly)
+		[3]: _1_upvr_2 (readonly)
+		[4]: Simple_upvr (readonly)
+		[5]: Funcs_upvr_2 (readonly)
+		[6]: var449_upvw (read and write)
+		[7]: Sounds_upvr (readonly)
+		[8]: SellItem_upvr (readonly)
+	]]
+	for _, v_4_upvr in ipairs(LocalPlayer_upvr:WaitForChild("Hats"):GetChildren()) do
+		local clone = script.InventoryTemplate:Clone()
+		clone.Parent = InventoryList_upvr_2
+		clone.Name = v_4_upvr.Name
+		clone.ItemInInv.Value = v_4_upvr
+		clone.ItemImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId="..tostring(_1_upvr_2[v_4_upvr.Name].ID).."&width=150&height=150&format=png"
+		clone.ItemName.Text = v_4_upvr.Name
+		clone.ItemValue.Text = Simple_upvr.Format(_1_upvr_2[v_4_upvr.Name].Price)..'$'
+		clone.V.Value = _1_upvr_2[v_4_upvr.Name].Price
+		clone.InnerColorFrame.Gradient.Color = Funcs_upvr_2.getGradientColors(v_4_upvr.Name).Color
+		clone.LayoutOrder = math.floor(-_1_upvr_2[v_4_upvr.Name].Price * 100)
+		clone.Visible = true
+		Funcs_upvr_2.animateButton(clone.Sell, 0.9, 1.1)
+		local any_Connect_result1_upvr_2 = clone.Sell.Activated:Connect(function() -- Line 1
+			--[[ Upvalues[4]:
+				[1]: var449_upvw (copied, read and write)
+				[2]: Sounds_upvr (copied, readonly)
+				[3]: SellItem_upvr (copied, readonly)
+				[4]: v_4_upvr (readonly)
+			]]
+			if not var449_upvw then
+				var449_upvw = true
+				Sounds_upvr.Sell:Play()
+				SellItem_upvr:InvokeServer(v_4_upvr.Name, game.PlaceVersion * 2)
+				task.wait(0.05)
+				var449_upvw = false
+			end
+		end)
+		clone.Destroying:Once(function() -- Line 1
+			--[[ Upvalues[1]:
+				[1]: any_Connect_result1_upvr_2 (readonly)
+			]]
+			any_Connect_result1_upvr_2:Disconnect()
+		end)
+	end
+end
+local SellDoubles = inventoryPage.ButtonsFrame.SellDoubles
+local SellDoubles_Confirm_upvr = inventoryPage.SellDoubles_Confirm
+Funcs_upvr_2.animateButton(SellDoubles, 0.9, 1.1)
+Funcs_upvr_2.animateButton(SellDoubles_Confirm_upvr.Confirm, 0.9, 1.1)
+Funcs_upvr_2.animateButton(SellDoubles_Confirm_upvr.Cancel, 0.9, 1.1)
+SellDoubles.Activated:Connect(function() -- Line 1
+	--[[ Upvalues[2]:
+		[1]: var449_upvw (read and write)
+		[2]: SellDoubles_Confirm_upvr (readonly)
+	]]
+	if not var449_upvw then
+		var449_upvw = true
+		SellDoubles_Confirm_upvr:TweenSize(UDim2.new(0.4, 0, 0.4, 0), "Out", "Quint", 0.3, true)
+		task.wait()
+		var449_upvw = false
+	end
+end)
+local SellDoubles_upvr = ReplicatedStorage.Events.SellDoubles
+SellDoubles_Confirm_upvr.Confirm.Activated:Connect(function() -- Line 1
+	--[[ Upvalues[5]:
+		[1]: var449_upvw (read and write)
+		[2]: SellDoubles_upvr (readonly)
+		[3]: SellDoubles_Confirm_upvr (readonly)
+		[4]: Funcs_upvr_2 (readonly)
+		[5]: Simple_upvr (readonly)
+	]]
+	if not var449_upvw then
+		var449_upvw = true
+		local any_InvokeServer_result1_2 = SellDoubles_upvr:InvokeServer()
+		SellDoubles_Confirm_upvr:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true)
+		if typeof(any_InvokeServer_result1_2) == "table" then
+			if 1000 <= any_InvokeServer_result1_2[2] then
+				Funcs_upvr_2.createNotification("Green", "Successfully sold "..any_InvokeServer_result1_2[1].." items for "..tostring(Simple_upvr.Format(math.floor(any_InvokeServer_result1_2[2]))).."$!", false, "", true, "Notif1")
+			else
+				Funcs_upvr_2.createNotification("Green", "Successfully sold "..any_InvokeServer_result1_2[1].." items for "..tostring(tonumber(string.format("%."..2..'f', any_InvokeServer_result1_2[2]))).."$!", false, "", true, "Notif1")
+			end
+		elseif any_InvokeServer_result1_2 == "NoItems" then
+			Funcs_upvr_2.createNotification("Red", "No items were sold!", false, "", true, "Notif3")
+		end
+		task.wait()
+		var449_upvw = false
+	end
+end)
+SellDoubles_Confirm_upvr.Cancel.Activated:Connect(function() -- Line 1
+	--[[ Upvalues[2]:
+		[1]: var449_upvw (read and write)
+		[2]: SellDoubles_Confirm_upvr (readonly)
+	]]
+	if not var449_upvw then
+		var449_upvw = true
+		SellDoubles_Confirm_upvr:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.3, true)
+		task.wait()
+		var449_upvw = false
+	end
+end)
+local function _() -- Line 1, Named "bf"
+	--[[ Upvalues[1]:
+		[1]: LocalPlayer_upvr (readonly)
+	]]
+	if 0 < #LocalPlayer_upvr.Hats:GetChildren() then
+		inventoryPage.NoItem.Visible = false
+	else
+		inventoryPage.NoItem.Visible = true
+	end
+end
+function addItem(arg1) -- Line 1
+	--[[ Upvalues[8]:
+		[1]: InventoryList_upvr_2 (readonly)
+		[2]: _1_upvr_2 (readonly)
+		[3]: Simple_upvr (readonly)
+		[4]: Funcs_upvr_2 (readonly)
+		[5]: var449_upvw (read and write)
+		[6]: Sounds_upvr (readonly)
+		[7]: SellItem_upvr (readonly)
+		[8]: LocalPlayer_upvr (readonly)
+	]]
+	local clone_10 = script.InventoryTemplate:Clone()
+	clone_10.Parent = InventoryList_upvr_2
+	clone_10.Name = arg1.Name
+	clone_10.ItemInInv.Value = arg1
+	clone_10.ItemImage.Image = "https://www.roblox.com/asset-thumbnail/image?assetId="..tostring(_1_upvr_2[arg1.Name].ID).."&width=150&height=150&format=png"
+	clone_10.ItemName.Text = arg1.Name
+	clone_10.ItemValue.Text = Simple_upvr.Format(_1_upvr_2[arg1.Name].Price)..'$'
+	clone_10.V.Value = _1_upvr_2[arg1.Name].Price
+	clone_10.InnerColorFrame.Gradient.Color = Funcs_upvr_2.getGradientColors(arg1.Name).Color
+	clone_10.LayoutOrder = math.floor(-_1_upvr_2[arg1.Name].Price * 100)
+	clone_10.Visible = true
+	Funcs_upvr_2.animateButton(clone_10.Sell, 0.9, 1.1)
+	local any_Connect_result1_upvr_6 = clone_10.Sell.Activated:Connect(function() -- Line 1
+		--[[ Upvalues[4]:
+			[1]: var449_upvw (copied, read and write)
+			[2]: Sounds_upvr (copied, readonly)
+			[3]: SellItem_upvr (copied, readonly)
+			[4]: arg1 (readonly)
+		]]
+		if not var449_upvw then
+			var449_upvw = true
+			Sounds_upvr.Sell:Play()
+			SellItem_upvr:InvokeServer(arg1.Name, game.PlaceVersion * 2)
+			task.wait(0.05)
+			var449_upvw = false
+		end
+	end)
+	clone_10.Destroying:Once(function() -- Line 1
+		--[[ Upvalues[1]:
+			[1]: any_Connect_result1_upvr_6 (readonly)
+		]]
+		any_Connect_result1_upvr_6:Disconnect()
+	end)
+	if 0 < #LocalPlayer_upvr.Hats:GetChildren() then
+		inventoryPage.NoItem.Visible = false
+	else
+		inventoryPage.NoItem.Visible = true
+	end
+end
+function deleteItem(arg1) -- Line 1
+	--[[ Upvalues[2]:
+		[1]: InventoryList_upvr_2 (readonly)
+		[2]: LocalPlayer_upvr (readonly)
+	]]
+	if InventoryList_upvr_2:FindFirstChild(arg1.Name) then
+		InventoryList_upvr_2:WaitForChild(arg1.Name):Destroy()
+	end
+	if 0 < #LocalPlayer_upvr.Hats:GetChildren() then
+		inventoryPage.NoItem.Visible = false
+	else
+		inventoryPage.NoItem.Visible = true
+	end
+end
+ReplicatedStorage.Events.GetLiveDrop.OnClientEvent:Connect(function(arg1, arg2, arg3) -- Line 1
+	--[[ Upvalues[8]:
+		[1]: tbl_upvr (readonly)
+		[2]: _1_upvr_2 (readonly)
+		[3]: var321_upvw (read and write)
+		[4]: Funcs_upvr_2 (readonly)
+		[5]: Simple_upvr (readonly)
+		[6]: Normals_upvr_2 (readonly)
+		[7]: TweenService_upvr_2 (readonly)
+		[8]: Players_upvr (readonly)
+	]]
+	-- KONSTANTERROR: [0] 1. Error Block 1 start (CF ANALYSIS FAILED)
+	-- KONSTANTERROR: [0] 1. Error Block 1 end (CF ANALYSIS FAILED)
+	-- KONSTANTERROR: [2] 2. Error Block 65 start (CF ANALYSIS FAILED)
+	local const_number_2 = 0
+	local buffer_readu8_result1_4 = buffer.readu8(arg1, const_number_2)
+	local var473 = const_number_2 + 1
+	local buffer_readstring_result1_5 = buffer.readstring(arg1, var473, buffer_readu8_result1_4)
+	local var475 = var473 + buffer_readu8_result1_4
+	local buffer_readu8_result1 = buffer.readu8(arg1, var475)
+	local var477 = var475 + 1
+	local buffer_readstring_result1_6 = buffer.readstring(arg1, var477, buffer_readu8_result1)
+	local var479 = var477 + buffer_readu8_result1
+	local buffer_readstring_result1 = buffer.readstring(arg1, var479 + 1, buffer.readu8(arg1, var479))
+	if tbl_upvr.HideLowPulls.Value == true and _1_upvr_2[buffer_readstring_result1_6].Price < 10 then return end
+	local clone_3_upvr = script.Parent.CenterFrame.LiveOpenings.Ressources.Template:Clone()
+	clone_3_upvr.LayoutOrder = var321_upvw
+	clone_3_upvr.Parent = script.Parent.CenterFrame.LiveOpenings
+	clone_3_upvr.MainLiveDropFrame.PlayerHead.Image = Funcs_upvr_2.getPlayerImage(game.Players:GetUserIdFromNameAsync(buffer_readstring_result1_5), 150)
+	clone_3_upvr.MainLiveDropFrame.ItemImage.Image = Funcs_upvr_2.getItemImage(buffer_readstring_result1_6, 100)
+	clone_3_upvr.MainLiveDropFrame.ItemName.Text = buffer_readstring_result1_6
+	clone_3_upvr.MainLiveDropFrame.PlayerName.Text = buffer_readstring_result1_5
+	if game.Players:FindFirstChild(buffer_readstring_result1_5) and game.Players:WaitForChild(buffer_readstring_result1_5).VIP.Value == true then
+		clone_3_upvr.MainLiveDropFrame.PlayerName.Text = buffer_readstring_result1_5.." 👑"
+		clone_3_upvr.MainLiveDropFrame.PlayerName.TextColor3 = Color3.fromRGB(249, 206, 46)
+	end
+	clone_3_upvr.MainLiveDropFrame.ColorFrame.Gradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Funcs_upvr_2.getColorOfRarity(buffer_readstring_result1_6)), ColorSequenceKeypoint.new(1, Color3.fromRGB(23, 23, 31))})
+	clone_3_upvr.MainLiveDropFrame.ItemPrice.Text = Simple_upvr.Format(_1_upvr_2[buffer_readstring_result1_6].Price)..'$'
+	clone_3_upvr.MainLiveDropFrame.CaseImage.Image = Normals_upvr_2[buffer_readstring_result1].CrateImage.Value
+	if Normals_upvr_2[buffer_readstring_result1].Price.Value < _1_upvr_2[buffer_readstring_result1_6].Price then
+		clone_3_upvr.MainLiveDropFrame.Profit.Text = "Profit: <font color=\"#4AC634\">+"..tostring(tonumber(string.format("%."..2..'f', _1_upvr_2[buffer_readstring_result1_6].Price - Normals_upvr_2[buffer_readstring_result1].Price.Value)))..'$'.."</font>"
+	else
+		clone_3_upvr.MainLiveDropFrame.Profit.Text = "Profit: <font color=\"#E81B0E\">"..tostring(tonumber(string.format("%."..2..'f', _1_upvr_2[buffer_readstring_result1_6].Price - Normals_upvr_2[buffer_readstring_result1].Price.Value)))..'$'.."</font>"
+	end
+	clone_3_upvr.Visible = true
+	clone_3_upvr:TweenSize(UDim2.new(1, 0, 0.1, 0), "Out", "Back", 0.2, true)
+	clone_3_upvr.MainLiveDropFrame.CaseName.Text = buffer_readstring_result1
+	script.Parent.CenterFrame.LiveOpenings.Order.Value = var321_upvw
+	var321_upvw += 1
+	local any_Connect_result1_upvw_3 = clone_3_upvr.MouseEnter:Connect(function() -- Line 1
+		--[[ Upvalues[2]:
+			[1]: clone_3_upvr (readonly)
+			[2]: TweenService_upvr_2 (copied, readonly)
+		]]
+		clone_3_upvr.Hover:Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame, TweenInfo.new(0.1), {
+			BackgroundColor3 = Color3.fromRGB(16, 16, 21);
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.CaseName, TweenInfo.new(0.1), {
+			TextTransparency = 1;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.ItemName, TweenInfo.new(0.1), {
+			TextTransparency = 1;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.ItemPrice, TweenInfo.new(0.1), {
+			TextTransparency = 1;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.PlayerName, TweenInfo.new(0.1), {
+			TextTransparency = 1;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.ItemImage, TweenInfo.new(0.1), {
+			ImageTransparency = 1;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.CaseImage, TweenInfo.new(0.1), {
+			ImageTransparency = 0;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.Profit, TweenInfo.new(0.1), {
+			TextTransparency = 0;
+		}):Play()
+	end)
+	local any_Connect_result1_upvw_2 = clone_3_upvr.MouseLeave:Connect(function() -- Line 1
+		--[[ Upvalues[2]:
+			[1]: TweenService_upvr_2 (copied, readonly)
+			[2]: clone_3_upvr (readonly)
+		]]
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame, TweenInfo.new(0.1), {
+			BackgroundColor3 = Color3.fromRGB(23, 23, 31);
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.CaseName, TweenInfo.new(0.1), {
+			TextTransparency = 0;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.ItemName, TweenInfo.new(0.1), {
+			TextTransparency = 0;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.ItemPrice, TweenInfo.new(0.1), {
+			TextTransparency = 0;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.PlayerName, TweenInfo.new(0.1), {
+			TextTransparency = 0;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.ItemImage, TweenInfo.new(0.1), {
+			ImageTransparency = 0;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.CaseImage, TweenInfo.new(0.1), {
+			ImageTransparency = 1;
+		}):Play()
+		TweenService_upvr_2:Create(clone_3_upvr.MainLiveDropFrame.Profit, TweenInfo.new(0.1), {
+			TextTransparency = 1;
+		}):Play()
+	end)
+	clone_3_upvr.Destroying:Once(function() -- Line 1
+		--[[ Upvalues[2]:
+			[1]: any_Connect_result1_upvw_3 (read and write)
+			[2]: any_Connect_result1_upvw_2 (read and write)
+		]]
+		any_Connect_result1_upvw_3:Disconnect()
+		any_Connect_result1_upvw_2:Disconnect()
+		any_Connect_result1_upvw_3 = nil
+		any_Connect_result1_upvw_2 = nil
+	end)
+	do
+		return
+	end
+	-- KONSTANTERROR: [2] 2. Error Block 65 end (CF ANALYSIS FAILED)
+end)
+script.Parent.CenterFrame.LiveOpenings.ChildAdded:Connect(function(arg1) -- Line 1
+	--[[ Upvalues[1]:
+		[1]: var321_upvw (read and write)
+	]]
+	repeat
+		task.wait()
+	until arg1.LayoutOrder ~= 1 and arg1.LayoutOrder ~= 0
+	task.wait(1)
+	for _, v_5 in ipairs(script.Parent.CenterFrame.LiveOpenings:GetChildren()) do
+		if v_5:IsA("Frame") and v_5.LayoutOrder < var321_upvw - 10 then
+			v_5:Destroy()
+		end
+	end
+end)
+local ProfileButton_2 = script.Parent.CenterFrame.Top.InnerTop.ProfileButton
+local ProfileFrame_upvr_2 = script.Parent.ProfileFrame
+local CloseButton = ProfileFrame_upvr_2.CloseButton
+local var513_upvw = false
+Funcs_upvr_2.animateButton(ProfileButton_2, 0.9, 1.1)
+Funcs_upvr_2.animateButton(CloseButton, 0.85, 1.25)
+CloseButton.Activated:Connect(function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: var513_upvw (read and write)
+		[2]: tbl_19_upvr (readonly)
+		[3]: ProfileFrame_upvr_2 (readonly)
+	]]
+	if not var513_upvw then
+		var513_upvw = true
+		if table.find(tbl_19_upvr, "Profile") ~= nil then
+			table.remove(tbl_19_upvr, table.find(tbl_19_upvr, "Profile"))
+			ProfileFrame_upvr_2:TweenPosition(UDim2.new(0.5, 0, 1.5, 0), "In", "Quint", 0.4, true)
+		end
+		task.wait()
+		var513_upvw = false
+	end
+end)
+ProfileButton_2.Activated:Connect(function() -- Line 1
+	--[[ Upvalues[4]:
+		[1]: var513_upvw (read and write)
+		[2]: var322_upvw (read and write)
+		[3]: tbl_19_upvr (readonly)
+		[4]: ProfileFrame_upvr_2 (readonly)
+	]]
+	if not var513_upvw and var322_upvw == false then
+		var513_upvw = true
+		if table.find(tbl_19_upvr, "Profile") == nil then
+			table.insert(tbl_19_upvr, "Profile")
+			ProfileFrame_upvr_2:TweenPosition(UDim2.new(0.5, 0, 0.5, 0), "Out", "Quint", 0.4, true)
+		end
+		task.wait()
+		var513_upvw = false
+	end
+end)
+LocalPlayer_upvr:WaitForChild("Wagered"):GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: ProfileFrame_upvr_2 (readonly)
+		[2]: Simple_upvr (readonly)
+		[3]: LocalPlayer_upvr (readonly)
+	]]
+	ProfileFrame_upvr_2.Wagered.CategoryValue.Text = Simple_upvr.FormatCompact(LocalPlayer_upvr:WaitForChild("Wagered").Value)..'$'
+end)
+LocalPlayer_upvr:WaitForChild("XP"):GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: ProfileFrame_upvr_2 (readonly)
+		[2]: Simple_upvr (readonly)
+		[3]: LocalPlayer_upvr (readonly)
+	]]
+	ProfileFrame_upvr_2.PlayerLevel.Text = "LEVEL "..Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("Level").Value).." ("..Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("XP").Value)..'/'..Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("Level").Value * 700 * (1 + LocalPlayer_upvr:WaitForChild("Level").Value / 10)).."XP)"
+	script.Parent.CenterFrame.Top.InnerTop.LevelProgress.XPProgress.Size = UDim2.new((LocalPlayer_upvr:WaitForChild("XP").Value) / (LocalPlayer_upvr:WaitForChild("Level").Value * 700 * (1 + LocalPlayer_upvr:WaitForChild("Level").Value / 10)), 0, 1, 0)
+end)
+InvValue_upvr_2:GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: ProfileFrame_upvr_2 (readonly)
+		[2]: Simple_upvr (readonly)
+		[3]: InvValue_upvr_2 (readonly)
+	]]
+	ProfileFrame_upvr_2.InventoryValue.CategoryValue.Text = Simple_upvr.FormatCompact(InvValue_upvr_2.Value)..'$'
+end)
+LocalPlayer_upvr:WaitForChild("JackpotsWon"):GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: ProfileFrame_upvr_2 (readonly)
+		[2]: Simple_upvr (readonly)
+		[3]: LocalPlayer_upvr (readonly)
+	]]
+	ProfileFrame_upvr_2.Jackpot.CategoryValue.Text = Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("JackpotsWon").Value)
+end)
+LocalPlayer_upvr:WaitForChild("Level"):GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: ProfileFrame_upvr_2 (readonly)
+		[2]: Simple_upvr (readonly)
+		[3]: LocalPlayer_upvr (readonly)
+	]]
+	ProfileFrame_upvr_2.PlayerLevel.Text = "LEVEL "..Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("Level").Value)
+	script.Parent.CenterFrame.Top.InnerTop.LevelText.Text = "Level "..Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("Level").Value)
+	script.Parent.CenterFrame.Top.InnerTop.LevelProgress.XPProgress:TweenSize(UDim2.new((LocalPlayer_upvr:WaitForChild("XP").Value) / (LocalPlayer_upvr:WaitForChild("Level").Value * 700 * (1 + LocalPlayer_upvr:WaitForChild("Level").Value / 10)), 0, 1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quint, 0.25, true)
+end)
+LocalPlayer_upvr:WaitForChild("InvPeak"):GetPropertyChangedSignal("Value"):Connect(function() -- Line 1
+	--[[ Upvalues[3]:
+		[1]: ProfileFrame_upvr_2 (readonly)
+		[2]: Simple_upvr (readonly)
+		[3]: LocalPlayer_upvr (readonly)
+	]]
+	ProfileFrame_upvr_2.Peak.CategoryValue.Text = Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("InvPeak").Value)..'$'
+end)
+;(function() -- Line 1, Named "bC"
+	--[[ Upvalues[5]:
+		[1]: ProfileFrame_upvr_2 (readonly)
+		[2]: LocalPlayer_upvr (readonly)
+		[3]: Funcs_upvr_2 (readonly)
+		[4]: Simple_upvr (readonly)
+		[5]: InvValue_upvr_2 (readonly)
+	]]
+	ProfileFrame_upvr_2.PlayerUser.Text = LocalPlayer_upvr.Name
+	local function _() -- Line 1
+		--[[ Upvalues[3]:
+			[1]: ProfileFrame_upvr_2 (copied, readonly)
+			[2]: Funcs_upvr_2 (copied, readonly)
+			[3]: LocalPlayer_upvr (copied, readonly)
+		]]
+		ProfileFrame_upvr_2.PlayerHead.Image = Funcs_upvr_2.getPlayerImage(LocalPlayer_upvr.UserId, 150)
+	end
+	ProfileFrame_upvr_2.Wagered.CategoryValue.Text = Simple_upvr.FormatCompact(LocalPlayer_upvr:WaitForChild("Wagered").Value)..'$'
+	ProfileFrame_upvr_2.InventoryValue.CategoryValue.Text = Simple_upvr.FormatCompact(InvValue_upvr_2.Value)..'$'
+	ProfileFrame_upvr_2.Jackpot.CategoryValue.Text = Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("JackpotsWon").Value)
+	ProfileFrame_upvr_2.Peak.CategoryValue.Text = Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("InvPeak").Value)..'$'
+	ProfileFrame_upvr_2.PlayerLevel.Text = "LEVEL "..Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("Level").Value).." ("..Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("XP").Value)..'/'..Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("Level").Value * 700 * (1 + LocalPlayer_upvr:WaitForChild("Level").Value / 10)).."XP)"
+end)()
+script.Parent.CenterFrame.Top.InnerTop.LevelText.Text = "Level "..Simple_upvr.Format(LocalPlayer_upvr:WaitForChild("Level").Value)
+local var523_upvr = "Level"
+script.Parent.CenterFrame.Top.InnerTop.LevelProgress.XPProgress.Size = UDim2.new((LocalPlayer_upvr:WaitForChild("XP").Value) / (LocalPlayer_upvr:WaitForChild("Level").Value * 700 * (1 + LocalPlayer_upvr:WaitForChild(var523_upvr).Value / 10)), 0, 1, 0)
+local Unboxed_upvr = script.Parent.CenterFrame.Unboxed
+serverFreeCasesOpened = LocalPlayer_upvr:WaitForChild("ODFolder"):WaitForChild("FCO").Value -- Setting global
+local ipairs_result1, ipairs_result2_7, ipairs_result3_6 = ipairs(Normals_upvr_2:GetChildren())
+-- KONSTANTERROR: [0] 1. Error Block 300 end (CF ANALYSIS FAILED)
+-- KONSTANTERROR: [1709] 1159. Error Block 369 start (CF ANALYSIS FAILED)
+-- KONSTANTWARNING: Failed to evaluate expression, replaced with nil [1709.106]
+if nil == 0 then
+	-- KONSTANTWARNING: Failed to evaluate expression, replaced with nil [1711.107]
+	nil.CrateInfo.RichText = true
+	-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+	-- KONSTANTWARNING: Failed to evaluate expression, replaced with nil [1718.105]
+	nil.CrateInfo.Text = nil.."\nPrice: <font color=\"#5FD739\">Free</font>"
+else
+	-- KONSTANTERROR: Expression was reused, decompilation is incorrect (x3)
+	nil.CrateInfo.Text = nil.."\nPrice: "..Simple_upvr.Format(nil)..'$'
+end
+-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+nil.Parent = CasesList_upvr
+-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+nil.CrateImage.Image = var523_upvr.CrateImage.Value
+-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+nil.LayoutOrder = math.floor(var523_upvr.Price.Value * 100)
+if var523_upvr:FindFirstChild("VIP") then
+	var349_upvw = true
+	-- KONSTANTERROR: Expression was reused, decompilation is incorrect (x3)
+	nil.CrateInfo.Text = nil.."\nPrice: "..Simple_upvr.Format(nil).."$ 👑"
+	-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+	nil.CrateInfo.TextColor3 = Color3.fromRGB(255, 174, 93)
+	-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+	if nil == 0 then
+		-- KONSTANTERROR: Expression was reused, decompilation is incorrect (x2)
+		nil.CrateInfo.Text = nil.."\nPrice: <font color=\"#5FD739\">Free</font> 👑"
+	end
+end
+-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+if nil == 0 and not var523_upvr:FindFirstChild("VIP") and LocalPlayer_upvr.VIP.Value == true then
+	-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+	nil.Visible = false
+end
+-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+local ColorG_upvr_2 = nil.ColorG
+-- KONSTANTERROR: Expression was reused, decompilation is incorrect (x2)
+nil.MouseEnter:Connect(function() -- Line 1
+	--[[ Upvalues[2]:
+		[1]: TweenService_upvr_2 (readonly)
+		[2]: ColorG_upvr_2 (readonly)
+	]]
+	TweenService_upvr_2:Create(ColorG_upvr_2, TweenInfo.new(0.2), {
+		Offset = Vector2.new(0, 0);
+	}):Play()
+end)
+-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+nil.MouseLeave:Connect(function() -- Line 1
+	--[[ Upvalues[2]:
+		[1]: TweenService_upvr_2 (readonly)
+		[2]: ColorG_upvr_2 (readonly)
+	]]
+	TweenService_upvr_2:Create(ColorG_upvr_2, TweenInfo.new(0.2), {
+		Offset = Vector2.new(0, 1);
+	}):Play()
+end)
+-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+Funcs_upvr_2.animateInnerElement(nil, nil.CrateImage, 0.9, 1.1)
+-- KONSTANTERROR: Expression was reused, decompilation is incorrect
+local var534_upvr
+nil.MouseButton2Click:Connect(function() -- Line 1
+	--[[ Upvalues[4]:
+		[1]: Sounds_upvr (readonly)
+		[2]: Percent_upvr (readonly)
+		[3]: var523_upvr (readonly)
+		[4]: var534_upvr (readonly)
+	]]
+	if script.Parent.Opening.Value == false then
+		Sounds_upvr.Inspect:Play()
+		Percent_upvr:TweenSize(UDim2.new(0.198, 0, 1, 0), "Out", "Quint", 0.4, true)
+		Percent_upvr.PercentList.CanvasPosition = Vector2.new(0, 0)
+		Percent_upvr.CaseImage.Image = var523_upvr.CrateImage.Value
+		Percent_upvr.CaseName.Text = var523_upvr.Name
+		Percent_upvr.Display:Invoke(var534_upvr)
+	end
+end)
+-- KONSTANTERROR: Expression was reused, decompilation is incorrect (x4)
+local var536_upvw = false
+local var537_upvw = false
+local var538_upvr
+local var539_upvw = true
+local mouse_upvr_2 = LocalPlayer_upvr:GetMouse()
+local var541_upvw = 0
+local NormalCrateOpen_upvr_2 = ReplicatedStorage.Events.NormalCrateOpen
+local var543_upvw = LocalPlayer_upvr.UserId * game.PlaceVersion
+local var544_upvw
+local UnboxGui_upvr_2 = script.Parent.UnboxGui
+local Ressources_upvr = script.Parent.Ressources
+local var547_upvr
+nil.Activated:Connect(function() -- Line 1
+	--[[ Upvalues[31]:
+		[1]: var536_upvw (read and write)
+		[2]: var420_upvw (read and write)
+		[3]: CaseMoney_upvr (readonly)
+		[4]: Normals_upvr_2 (readonly)
+		[5]: var534_upvr (readonly)
+		[6]: var322_upvw (read and write)
+		[7]: var537_upvw (read and write)
+		[8]: Unboxed_upvr (readonly)
+		[9]: tbl_19_upvr (readonly)
+		[10]: CasesList_upvr (readonly)
+		[11]: var538_upvr (readonly)
+		[12]: Funcs_upvr_2 (readonly)
+		[13]: var349_upvw (read and write)
+		[14]: LocalPlayer_upvr (readonly)
+		[15]: _1_upvr_2 (readonly)
+		[16]: Percent_upvr (readonly)
+		[17]: var539_upvw (read and write)
+		[18]: ab_upvr (readonly)
+		[19]: mouse_upvr_2 (readonly)
+		[20]: var541_upvw (read and write)
+		[21]: NormalCrateOpen_upvr_2 (readonly)
+		[22]: var543_upvw (read and write)
+		[23]: var544_upvw (read and write)
+		[24]: UnboxGui_upvr_2 (readonly)
+		[25]: Ressources_upvr (readonly)
+		[26]: Simple_upvr (readonly)
+		[27]: var547_upvr (readonly)
+		[28]: Sounds_upvr (readonly)
+		[29]: tbl_50_upvw (read and write)
+		[30]: var352_upvw (read and write)
+		[31]: var523_upvr (readonly)
+	]]
+	-- KONSTANTWARNING: Variable analysis failed. Output will have some incorrect variable assignments
+	-- KONSTANTERROR: [0] 1. Error Block 1 start (CF ANALYSIS FAILED)
+	-- KONSTANTERROR: [0] 1. Error Block 1 end (CF ANALYSIS FAILED)
+	-- KONSTANTERROR: [3] 3. Error Block 64 start (CF ANALYSIS FAILED)
+	var536_upvw = true
+	if var420_upvw == false then
+		if Normals_upvr_2[var534_upvr].Price.Value <= CaseMoney_upvr.Value then
+			if not var322_upvw and var537_upvw == false and Unboxed_upvr.Visible == false and #tbl_19_upvr == 0 and CasesList_upvr.Parent.ItemInfoFrame.Position == UDim2.new(0.5, 0, 1.5, 0) then
+				var322_upvw = true
+				script.Parent.Opening.Value = true
+				if 0 < Normals_upvr_2[var534_upvr].Price.Value then
+					var538_upvr.Purchase:Play()
+				end
+				Funcs_upvr_2.changeInteractOfParentedElement(script.Parent.CenterFrame.Second.ButtonFrame, false)
+				if var349_upvw == true and LocalPlayer_upvr.VIP.Value == false then
+					Funcs_upvr_2.createNotification("Red", "You need VIP to open this crate!", false, "", true, "Notif1")
+					var322_upvw = false
+					Funcs_upvr_2.changeInteractOfParentedElement(script.Parent.CenterFrame.Second.ButtonFrame, true)
+					script.Parent.Opening.Value = false
+					var536_upvw = false
+					return
+				end
+				local var556
+				local function INLINED_3() -- Internal function, doesn't exist in bytecode
+					var556 = var534_upvr
+					return var556 == "VIP Free Case"
+				end
+				if var556 == "Free Case" or INLINED_3() then
+					var556 = 0
+					freeCasesOpenedLocal = freeCasesOpenedLocal + 1 -- Setting global
+					for i_8, v_6 in ipairs(LocalPlayer_upvr.Hats:GetChildren()) do
+						var556 += _1_upvr_2[v_6.Name].Price
+						if Normals_upvr_2["Free Case"].Loot:FindFirstChild(v_6.Name) or Normals_upvr_2["VIP Free Case"].Loot:FindFirstChild(v_6.Name) then
+						end
+					end
+					if 75 <= CaseMoney_upvr.Value or 200 <= var556 or 75 <= var556 + _1_upvr_2[v_6.Name].Price then
+						i_8 = false
+						v_6 = ""
+						Funcs_upvr_2.createNotification("Red", "You already have money / items in your inventory", i_8, v_6, true, "Notif3")
+						var322_upvw = false
+						v_6 = script.Parent
+						i_8 = v_6.CenterFrame
+						Funcs_upvr_2.changeInteractOfParentedElement(i_8.Second.ButtonFrame, true)
+						script.Parent.Opening.Value = false
+						var536_upvw = false
+						return
+					end
+					Percent_upvr:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Quint", 0.4, true)
+				end
+				var556 = var539_upvw
+				if var556 == false then
+					var556 = warn
+					var556((LocalPlayer_upvr.UserId * 2).." WNF")
+				end
+				var556 = ab_upvr(mouse_upvr_2, var538_upvr)
+				if var556 then
+				else
+					var556 = warn
+					var556((LocalPlayer_upvr.UserId * 2).." CNOB1")
+				end
+				var556 = var541_upvw + 1
+				var541_upvw = var556
+				var556 = NormalCrateOpen_upvr_2:FireServer
+				var556(var534_upvr, var543_upvw)
+				var556 = NormalCrateOpen_upvr_2.OnClientEvent
+				var556 = var556:Connect(function(arg1, arg2) -- Line 1
+					--[[ Upvalues[16]:
+						[1]: LocalPlayer_upvr (copied, readonly)
+						[2]: var543_upvw (copied, read and write)
+						[3]: Funcs_upvr_2 (copied, readonly)
+						[4]: Normals_upvr_2 (copied, readonly)
+						[5]: var534_upvr (copied, readonly)
+						[6]: UnboxGui_upvr_2 (copied, readonly)
+						[7]: Ressources_upvr (copied, readonly)
+						[8]: _1_upvr_2 (copied, readonly)
+						[9]: Simple_upvr (copied, readonly)
+						[10]: var547_upvr (copied, readonly)
+						[11]: CasesList_upvr (copied, readonly)
+						[12]: Sounds_upvr (copied, readonly)
+						[13]: var322_upvw (copied, read and write)
+						[14]: tbl_50_upvw (copied, read and write)
+						[15]: var352_upvw (copied, read and write)
+						[16]: var544_upvw (copied, read and write)
+					]]
+					-- KONSTANTWARNING: Variable analysis failed. Output will have some incorrect variable assignments
+					local var573
+					if freeCasesOpenedLocal < serverFreeCasesOpened then
+						var573 = LocalPlayer_upvr.UserId
+						warn((var573 * 2).." LFCOSFC")
+					end
+					var573 = game.PlaceVersion
+					var573 = LocalPlayer_upvr.UserId
+					var543_upvw *= var573 / 3 + var573
+					local tbl_33 = {}
+					var573 = 0
+					local any_getCaseLoot_result1 = Funcs_upvr_2.getCaseLoot(Funcs_upvr_2.getSortedTable(Normals_upvr_2[arg2].Loot), false)
+					for _, v_7 in ipairs(Normals_upvr_2[var534_upvr].Loot:GetChildren()) do
+						local var579
+						if LocalPlayer_upvr.Settings.RealOddsDisplay.Value then
+							var573 += v_7.Value
+						else
+							var573 += 1
+						end
+						local tbl_2 = {}
+						var579 = v_7.Name
+						tbl_2.name = var579
+						local function INLINED_4() -- Internal function, doesn't exist in bytecode
+							var579 = v_7.Value
+							return var579
+						end
+						if not LocalPlayer_upvr.Settings.RealOddsDisplay.Value or not INLINED_4() then
+							var579 = 1
+						end
+						tbl_2.weight = var579
+						table.insert(tbl_33, tbl_2)
+					end
+					UnboxGui_upvr_2.Size = UDim2.new(0.544, 0, 0.282, 0)
+					UnboxGui_upvr_2.WeaponsClipping.Scroller.Size = UDim2.new(0, 90 * UnboxGui_upvr_2.WeaponsClipping.Scroller.AbsoluteSize.Y, 1, 0)
+					UnboxGui_upvr_2.WeaponsClipping.Scroller.Position = UDim2.new(0, 0, 0, 0)
+					UnboxGui_upvr_2.WeaponsClipping.Scroller:ClearAllChildren()
+					for i_10 = 1, 90 do
+						local clone_5 = Ressources_upvr.RollFrame:Clone()
+						clone_5.Parent = UnboxGui_upvr_2.WeaponsClipping.Scroller
+						local var582
+						if i_10 ~= math.random(75, 83) then
+							var582 = Funcs_upvr_2.selectRandomFromWeightTable(tbl_33, var573)
+						else
+							local var583_upvw = clone_5
+							var582 = Normals_upvr_2[var534_upvr].Loot[arg1].Name
+						end
+						clone_5.Img.Image = "https://www.roblox.com/asset-thumbnail/image?assetId=".._1_upvr_2[var582].ID.."&width=150&height=150&format=png"
+						clone_5.Itm.Text = var582
+						clone_5.Gradient.Color = Funcs_upvr_2.getGradientColors(var582).Color
+						clone_5.Valeur.Text = "<stroke color=\"#494441\" joins=\"miter\" thickness=\"2\" transparency=\"0.5\">"..Simple_upvr.Format(_1_upvr_2[var582].Price).."$</stroke>"
+						if 0 < var547_upvr and Funcs_upvr_2.browseDictionnary(any_getCaseLoot_result1[1], var582).weight <= any_getCaseLoot_result1[2] / 75 and Normals_upvr_2[arg2].Price.Value * 5 <= _1_upvr_2[var582].Price then
+							clone_5.Img.Image = "rbxassetid://139843655532969"
+							clone_5.Img.Position = UDim2.new(0.5, 0, 0.5, 0)
+							clone_5.Img.Size = UDim2.new(0.8, 0, 0.8, 0)
+							clone_5.Itm:Destroy()
+							clone_5.Valeur:Destroy()
+							clone_5.Gradient:Destroy()
+							Ressources_upvr.MythicGradient:Clone().Parent = clone_5
+						end
+						clone_5.Size = UDim2.new(0, UnboxGui_upvr_2.WeaponsClipping.Scroller.AbsoluteSize.X / 90, 1, 0)
+						clone_5.Position = UDim2.new(0, (clone_5.AbsoluteSize.X + clone_5.AbsoluteSize.X * 0.03) * (i_10 - 1), 0, 0)
+						clone_5.Visible = true
+					end
+					Funcs_upvr_2.changeInteractOfParentedElement(CasesList_upvr, false)
+					script.Parent.Font.Visible = true
+					UnboxGui_upvr_2.Visible = false
+					UnboxGui_upvr_2.Size = UDim2.new(0.544, 0, 0.282, 0)
+					task.wait()
+					local var584_upvr = var583_upvw.AbsolutePosition.X + var583_upvw.AbsoluteSize.X / 2 - UnboxGui_upvr_2.Marker.AbsolutePosition.X
+					UnboxGui_upvr_2.Size = UDim2.new(0, 0, 0, 0)
+					UnboxGui_upvr_2.Visible = true
+					UnboxGui_upvr_2:TweenSize(UDim2.new(0.544, 0, 0.282, 0), "Out", "Quint", 0.4, true)
+					UnboxGui_upvr_2.WeaponsClipping.Scroller:TweenPosition(UDim2.new(0, -var584_upvr + math.random(-var583_upvw.AbsoluteSize.X / 2.2, var583_upvw.AbsoluteSize.X / 2.2), 0, 0), "Out", "Quint", 6.5, true)
+					Sounds_upvr.Spin:Play()
+					local var585_upvw = false
+					task.delay(5.5, function() -- Line 1
+						--[[ Upvalues[8]:
+							[1]: Sounds_upvr (copied, readonly)
+							[2]: UnboxGui_upvr_2 (copied, readonly)
+							[3]: var584_upvr (readonly)
+							[4]: var583_upvw (read and write)
+							[5]: var585_upvw (read and write)
+							[6]: Funcs_upvr_2 (copied, readonly)
+							[7]: arg2 (readonly)
+							[8]: arg1 (readonly)
+						]]
+						Sounds_upvr.Switch:Play()
+						UnboxGui_upvr_2.WeaponsClipping.Scroller:TweenPosition(UDim2.new(0, -var584_upvr, 0, 0), "Out", "Back", 0.2, true)
+						if var583_upvw.Img.Image == "rbxassetid://139843655532969" then
+							var585_upvw = true
+							var583_upvw.Img:TweenSize(UDim2.new(2, 0, 2, 0), "In", "Back", 0.5, true)
+							Sounds_upvr.SoloMythicSpin:Play()
+							task.wait(0.5)
+							var583_upvw.Img:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.3, true)
+							task.wait(0.27)
+							Funcs_upvr_2.clearAllSpecificElement(UnboxGui_upvr_2.WeaponsClipping.Scroller, {"Frame"})
+							Funcs_upvr_2.createSoloGoldSpin(UnboxGui_upvr_2, arg2, arg1)
+						end
+					end)
+					task.delay(6, function() -- Line 1
+						--[[ Upvalues[12]:
+							[1]: var585_upvw (read and write)
+							[2]: UnboxGui_upvr_2 (copied, readonly)
+							[3]: var322_upvw (copied, read and write)
+							[4]: Funcs_upvr_2 (copied, readonly)
+							[5]: arg1 (readonly)
+							[6]: Simple_upvr (copied, readonly)
+							[7]: _1_upvr_2 (copied, readonly)
+							[8]: Normals_upvr_2 (copied, readonly)
+							[9]: var534_upvr (copied, readonly)
+							[10]: tbl_50_upvw (copied, read and write)
+							[11]: var352_upvw (copied, read and write)
+							[12]: var544_upvw (copied, read and write)
+						]]
+						if var585_upvw == true then
+							task.wait(5.7)
+						end
+						UnboxGui_upvr_2.Visible = false
+						UnboxGui_upvr_2.Size = UDim2.new(0.544, 0, 0.282, 0)
+						UnboxGui_upvr_2.WeaponsClipping.Scroller:ClearAllChildren()
+						var322_upvw = false
+						script.Parent.CenterFrame.Unboxed.ButtonsFrame.Sell.Color.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.fromRGB(math.random(42, 60), math.random(179, 255), math.random(40, 57))), ColorSequenceKeypoint.new(1, Color3.fromRGB(math.random(11, 24), math.random(44, 97), math.random(13, 29)))})
+						script.Parent.CenterFrame.Unboxed.InnerFrame.Gradient.Color = Funcs_upvr_2.getGradientColors(arg1).Color
+						script.Parent.CenterFrame.Unboxed.ButtonsFrame.Sell.ButtonText.Text = "Sell for "..tostring(Simple_upvr.Format(_1_upvr_2[arg1].Price))..'$'
+						script.Parent.CenterFrame.Unboxed.ItemImage.Image = "rbxthumb://type=Asset&id=".._1_upvr_2[arg1].ID.."&w=150&h=150"
+						script.Parent.CenterFrame.Unboxed.ItemName.Text = arg1
+						script.Parent.CenterFrame.Unboxed.Complete:Play()
+						script.Parent.CenterFrame.Unboxed.Size = UDim2.new(0, 0, 0, 0)
+						script.Parent.CenterFrame.Unboxed.Position = UDim2.new(math.random(4, 6) / 10, 0, 0.5, 0)
+						script.Parent.CenterFrame.Unboxed.Visible = true
+						script.Parent.CenterFrame.Unboxed:TweenSize(UDim2.new(0.22, 0, 0.5, 0), "Out", "Quint", 0.25, true)
+						if 0 < Normals_upvr_2[var534_upvr].Price.Value and Normals_upvr_2[var534_upvr].Price.Value * 5 < _1_upvr_2[arg1].Price then
+							task.delay(0.3, function() -- Line 1
+								--[[ Upvalues[2]:
+									[1]: tbl_50_upvw (copied, read and write)
+									[2]: var352_upvw (copied, read and write)
+								]]
+								script.BigWin_Sound:Play()
+								tbl_50_upvw = {Color3.fromRGB(255, 80, 80), Color3.fromRGB(80, 255, 124), Color3.fromRGB(47, 75, 255)}
+								local const_number_upvr_2 = 1
+								task.spawn(function() -- Line 1
+									--[[ Upvalues[2]:
+										[1]: var352_upvw (copied, read and write)
+										[2]: const_number_upvr_2 (readonly)
+									]]
+									var352_upvw = true
+									task.wait(const_number_upvr_2)
+									var352_upvw = false
+								end)
+							end)
+						end
+						var544_upvw:Disconnect()
+					end)
+				end)
+				var544_upvw = var556
+				-- KONSTANTWARNING: GOTO [396] #290
+			end
+		else
+			var556 = Funcs_upvr_2.createNotification
+			var556("Red", "You don't have enough money to open this case!", false, "", true, "Notif3")
+		end
+	else
+		var556 = Sounds_upvr.Inspect:Play
+		var556()
+		var556 = Percent_upvr:TweenSize
+		var556(UDim2.new(0.198, 0, 1, 0), "Out", "Quint", 0.4, true)
+		var556 = Percent_upvr.PercentList
+		var556.CanvasPosition = Vector2.new(0, 0)
+		var556 = Percent_upvr.CaseImage
+		var556.Image = var523_upvr.CrateImage.Value
+		var556 = Percent_upvr.CaseName
+		var556.Text = var523_upvr.Name
+		var556 = Percent_upvr.Display:Invoke
+		var556(var534_upvr)
+	end
+	-- KONSTANTERROR: [3] 3. Error Block 64 end (CF ANALYSIS FAILED)
+end)
+local New_Display_upvr_2 = nil.New_Display
+local CrateInfo_upvr = nil.CrateInfo
+local Texte_upvr = nil.SpecialDisplay.Texte
+script.Parent.Events.ChangeDisplay.Event:Connect(function(arg1) -- Line 1
+	--[[ Upvalues[4]:
+		[1]: New_Display_upvr_2 (readonly)
+		[2]: var538_upvr (readonly)
+		[3]: CrateInfo_upvr (readonly)
+		[4]: Texte_upvr (readonly)
+	]]
+	if arg1 == "New" then
+		if New_Display_upvr_2.Visible == true and New_Display_upvr_2.BackgroundTransparency == 0 then
+			var538_upvr.Visible = true
+		else
+			var538_upvr.Visible = false
+		end
+	end
+	if arg1 == "VIP" then
+		if CrateInfo_upvr.TextColor3 == Color3.fromRGB(255, 174, 93) then
+			var538_upvr.Visible = true
+		else
+			var538_upvr.Visible = false
+		end
+	end
+	if arg1 == "10%" or arg1 == "50/50" or arg1 == "5%" or arg1 == "70%" or arg1 == "1%" or arg1 == "Partner" then
+		if Texte_upvr.Text == arg1 then
+			var538_upvr.Visible = true
+		else
+			var538_upvr.Visible = false
+		end
+	end
+	var538_upvr.Visible = true
+end)
+for _, v_8 in ipairs(var538_upvr:GetDescendants()) do
+	if not v_8:IsA("Sound") then
+		v_8.Name = any_GenerateGUID_result1
+	end
+end
+-- KONSTANTERROR: [1709] 1159. Error Block 369 end (CF ANALYSIS FAILED)
+-- KONSTANTERROR: [1533] 1048. Error Block 368 start (CF ANALYSIS FAILED)
+if ColorG_upvr_2 ~= nil then
+else
+end
+-- KONSTANTERROR: [1533] 1048. Error Block 368 end (CF ANALYSIS FAILED)
