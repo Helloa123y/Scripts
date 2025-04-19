@@ -252,7 +252,7 @@ local function LoadPlayerItems(List)
 		Clone.TextLabel.Text = Table[1].."x"
 	end
 end
-Gui.Main.Notifications.Types.Teleport.Sound.Volume = 0 
+Gui.Main.Notifications.Types.Teleport.Sound.Volume = 0
 local NotificationDemos = {
 	["Canceled"] = Gui.Main.Notifications.Types.Canceled,
 	["ItemAdd"] = Gui.Main.Notifications.Types.ItemAdd,
