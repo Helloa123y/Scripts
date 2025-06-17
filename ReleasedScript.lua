@@ -258,7 +258,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
        SavedPos = false
    end
    if not isFlying2 or not rootPart or not humanoid then return end
-
+    UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
     local gameProcessingInput = UserInputService:GetFocusedTextBox() ~= nil
     local moveDirection = Vector3.new()
 
