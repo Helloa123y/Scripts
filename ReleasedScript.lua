@@ -245,6 +245,9 @@ end)
 
 RunService.Heartbeat:Connect(function(deltaTime)
    if not InjectionConfirmed then return end
+   if character then 
+	camera.CameraSubject = character.HumanoidRootPart
+   end
    if humanoid.Health < 30 and character:GetAttribute("IsRagdolling") then
        if SavedPos == false then
            SavedPos =  rootPart.CFrame
