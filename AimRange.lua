@@ -16,7 +16,7 @@ local Test = function(arg1, arg2, arg3, arg4)
         local origin = Character.HumanoidRootPart.Position
         local lookVector = workspace.CurrentCamera.CFrame.LookVector
         
-        local MAX_DISTANCE = 800
+        local MAX_DISTANCE = 200
         local MAX_ANGLE = 45
         local FADE_DURATION = 0.15
         
@@ -33,7 +33,7 @@ local Test = function(arg1, arg2, arg3, arg4)
         	if angle > MAX_ANGLE then continue end
         	local normalizedDistance = distance / MAX_DISTANCE
         	local normalizedAngle = angle / MAX_ANGLE
-        	local score = (normalizedDistance * 0.6) + (normalizedAngle * 0.4) + if plr.Character:GetAttribute("IsRagdolling") then 0.5 else 0
+        	local score = (normalizedDistance * 0.6) + (normalizedAngle * 0.4) 
             
         	if score < bestScore and not part.Parent.HumanoidRootPart:GetAttribute("IsDead") then
         		bestScore = score
