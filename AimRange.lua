@@ -35,7 +35,7 @@ local Test = function(arg1, arg2, arg3, arg4)
         	local normalizedAngle = angle / MAX_ANGLE
         	local score = (normalizedDistance * 0.6) + (normalizedAngle * 0.4) 
             
-        	if score < bestScore and not part.Parent.Humanoid:GetAttribute("IsDead") then
+        	if score < bestScore and not part.Parent.Humanoid:GetAttribute("IsDead") and not table.find(_G.Withelist, plr.Name) then
         		bestScore = score
         		bestPart = plr
         	end
