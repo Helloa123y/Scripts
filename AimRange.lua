@@ -1,72 +1,63 @@
+_G.Withelist =  if _G.Withelist then _G.Withelist else {}
+
 local Test = function(arg1, arg2, arg3, arg4)
-	local Withlist = {
-		"ekincan390",
-		"Temu_jisler",
-		"saaed1002",
-		"Mabruk_54",
-		"Black_Cats187"
-	}
 	local function getTargetDirection()
-		local LocalPlayer = game.Players.LocalPlayer
-		local Character = LocalPlayer.Character
-		if not Character then 
-			return arg2 -- Fallback, falls kein Charakter
-		end
+        local LocalPlayer = game.Players.LocalPlayer
+        local Character = LocalPlayer.Character
+        if not Character then 
+        	return arg2 -- Fallback, falls kein Charakter
+        end
+        
+        local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+        if not HumanoidRootPart then 
+        	return arg2 -- Fallback, falls kein HRP
+        end
+        
+        local origin = Character.HumanoidRootPart.Position
+        local lookVector = workspace.CurrentCamera.CFrame.LookVector
+        
+        local MAX_DISTANCE = 800
+        local MAX_ANGLE = 45
+        local FADE_DURATION = 0.15
+        
+        local bestPart = nil
+        local bestScore = 0.6
+        for _, part in ipairs(game.Players:GetPlayers()) do
+            local plr = part
+            if not part.Character then continue end
+            local part = part.Character.HumanoidRootPart
+        	local directionToPart = (part.Position - origin)
+        	local distance = directionToPart.Magnitude
+        	if distance > MAX_DISTANCE then continue end
+        	local angle = math.deg(math.acos(lookVector:Dot(directionToPart.Unit)))
+        	if angle > MAX_ANGLE then continue end
+        	local normalizedDistance = distance / MAX_DISTANCE
+        	local normalizedAngle = angle / MAX_ANGLE
+        	local score = (normalizedDistance * 0.6) + (normalizedAngle * 0.4) + if plr.Character:GetAttribute("IsRagdolling") then 0.5 else 0
+            
+        	if score < bestScore and not part.Parent.HumanoidRootPart:GetAttribute("IsDead") then
+        		bestScore = score
+        		bestPart = plr
+        	end
+        end
+        
+        -- Wenn ein Ziel gefunden wurde, ziele auf dessen Kopf
+        if bestPart then
+        	local targetHead = bestPart.Character:FindFirstChild("Head")
+        	if targetHead then
+        		local cameraPos = workspace.CurrentCamera.CFrame.Position
+        		local distanceToTarget = (targetHead.Position - cameraPos).Magnitude
+        		local direction = (targetHead.Position - cameraPos).Unit
+        		local Pos = cameraPos + direction * (distanceToTarget - 6)
+        		print((Pos - targetHead.Position).Magnitude)
+        		local Head = bestPart.Character.Head
+        		return  direction * 500 , Pos , Head
+        	end
+        end
+        
+        return arg2 -- Fallback auf ursprüngliche Richtung
+    end
 
-		local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-		if not HumanoidRootPart then 
-			return arg2 -- Fallback, falls kein HRP
-		end
-
-		local Position = HumanoidRootPart.Position
-		local Table = {}
-		local Range = 800 -- Anpassbar
-
-		-- Finde alle gültigen Spieler in Reichweite
-		for _, player in game.Players:GetPlayers() do
-			if player ~= LocalPlayer and not table.find(Withlist , player.Name) then
-				local targetChar = player.Character
-				if targetChar then
-					local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
-					local targetHum = targetChar:FindFirstChildWhichIsA("Humanoid")
-
-					if targetHRP and targetHum and not targetHum:GetAttribute("IsDead") then
-						local distance = (targetHRP.Position - Position).Magnitude
-						if distance <= Range then
-							local directionToTarget = (targetHRP.Position - Position).Unit
-							local lookDot = HumanoidRootPart.CFrame.LookVector:Dot(directionToTarget)
-							if math.acos(lookDot) <= 1.2 then -- ~68.7° FOV
-								table.insert(Table, {
-									player = player,
-									distance = distance
-								})
-							end
-						end
-					end
-				end
-			end
-		end
-
-		-- Sortiere nach Entfernung (nächster Spieler zuerst)
-		table.sort(Table, function(a, b)
-			return a.distance < b.distance
-		end)
-
-		-- Wenn ein Ziel gefunden wurde, ziele auf dessen Kopf
-		if Table[1] then
-			local targetHead = Table[1].player.Character:FindFirstChild("Head")
-			if targetHead then
-				local cameraPos = workspace.CurrentCamera.CFrame.Position
-				local distanceToTarget = (targetHead.Position - cameraPos).Magnitude
-				local direction = (targetHead.Position - cameraPos).Unit
-				local Pos = cameraPos + direction * (distanceToTarget - 6)
-				print((Pos - targetHead.Position).Magnitude)
-				return  direction * 500 , Pos , Table[1].player.Character:FindFirstChild("Head")
-			end
-		end
-
-		return arg2 -- Fallback auf ursprüngliche Richtung
-	end
 
 	local direction , Pos , Head = getTargetDirection()
 	local var49 = {}
@@ -133,4 +124,3 @@ local cool = function()
 end
 print("YES")
 hookfunction(OldFunction, cool)
-
