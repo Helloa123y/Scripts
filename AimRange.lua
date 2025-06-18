@@ -24,8 +24,8 @@ local Test = function(arg1, arg2, arg3, arg4)
         local bestScore = 0.6
         for _, part in ipairs(game.Players:GetPlayers()) do
             local plr = part
-            if not part.Character then continue end
-            local part = part.Character.HumanoidRootPart
+            if not part.Character or not part.Character:FindFirstChild("HumanoidRootPart") then continue end
+            	local part = part.Character.HumanoidRootPart
         	local directionToPart = (part.Position - origin)
         	local distance = directionToPart.Magnitude
         	if distance > MAX_DISTANCE then continue end
@@ -35,7 +35,7 @@ local Test = function(arg1, arg2, arg3, arg4)
         	local normalizedAngle = angle / MAX_ANGLE
         	local score = (normalizedDistance * 0.6) + (normalizedAngle * 0.4) 
             
-        	if score < bestScore and not part.Parent.HumanoidRootPart:GetAttribute("IsDead") then
+        	if score < bestScore and not part.Parent.Humanoid:GetAttribute("IsDead") then
         		bestScore = score
         		bestPart = plr
         	end
