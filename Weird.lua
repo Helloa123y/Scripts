@@ -1,5 +1,5 @@
 
-local LuaComipler = require(script.LS)
+local LuaComipler = require(script.Parent)
 local HttpService = game:GetService("HttpService")
 
 
