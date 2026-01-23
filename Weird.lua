@@ -1,5 +1,5 @@
 
-local LuaComipler = require(script.Parent)
+local LuaComipler = require(script.LS)
 local HttpService = game:GetService("HttpService")
 
 
@@ -457,21 +457,27 @@ restoreFolder(savedFolderData, game.Workspace)
 
 -- Asset Loading 
 
-local LoadAsset = game.ReplicatedStorage.RequestAsset
-local source = LoadAsset:InvokeServer(109726086044152)
-source = source:Clone()
 
-for _ ,part in pairs(source:WaitForChild("Loadable"):GetChildren()) do
-	if part:GetAttribute("Parent") ~= "PlayerScript" then
-		part.Parent = game[part:GetAttribute("Parent")]
-		if part:GetAttribute("Parent") == "StarterGui" then
-			local Clone = part:Clone()
-			Clone.Parent = player.PlayerGui
+
+local Success = false
+repeat
+	Success = pcall(function()
+		local LoadAsset = game.ReplicatedStorage.RequestAsset
+		local source = LoadAsset:InvokeServer(109726086044152)
+		source = source:Clone()
+		for _ ,part in pairs(source:WaitForChild("Loadable"):GetChildren()) do
+			if part:GetAttribute("Parent") ~= "PlayerScript" then
+				part.Parent = game[part:GetAttribute("Parent")]
+				if part:GetAttribute("Parent") == "StarterGui" then
+					local Clone = part:Clone()
+					Clone.Parent = player.PlayerGui
+				end
+			else
+				part.Parent = player.PlayerScripts
+			end
 		end
-	else
-		part.Parent = player.PlayerScripts
-	end
-end
+	end)
+until Success
 
 waitForScriptsToLoad()
 
