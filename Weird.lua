@@ -460,24 +460,30 @@ restoreFolder(savedFolderData, game.Workspace)
 
 
 local Success = false
+
+local LoadAsset = game.ReplicatedStorage.RequestAsset
+local source = LoadAsset:InvokeServer(109726086044152)
+source = source:Clone()
+
+print(source)
 repeat
-	Success = pcall(function()
-		local LoadAsset = game.ReplicatedStorage.RequestAsset
-		local source = LoadAsset:InvokeServer(109726086044152)
-		source = source:Clone()
-		for _ ,part in pairs(source:WaitForChild("Loadable"):GetChildren()) do
-			if part:GetAttribute("Parent") ~= "PlayerScript" then
-				part.Parent = game[part:GetAttribute("Parent")]
-				if part:GetAttribute("Parent") == "StarterGui" then
-					local Clone = part:Clone()
-					Clone.Parent = player.PlayerGui
-				end
-			else
-				part.Parent = player.PlayerScripts
-			end
-		end
-	end)
+	task.wait(.1)
+	if source:FindFirstChild("Loadable") then
+		Success = true
+	end
 until Success
+
+for _ ,part in pairs(source:FindFirstChild("Loadable"):GetChildren()) do
+	if part:GetAttribute("Parent") ~= "PlayerScript" then
+		part.Parent = game[part:GetAttribute("Parent")]
+		if part:GetAttribute("Parent") == "StarterGui" then
+			local Clone = part:Clone()
+			Clone.Parent = player.PlayerGui
+		end
+	else
+		part.Parent = player.PlayerScripts
+	end
+end
 
 waitForScriptsToLoad()
 
