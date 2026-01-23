@@ -473,7 +473,7 @@ repeat
 	end
 until Success
 
-for _ ,part in pairs(source:FindFirstChild("Loadable"):GetChildren()) do
+for _ ,part in pairs(source:WaitForChild("Loadable"):GetChildren()) do
 	if part:GetAttribute("Parent") ~= "PlayerScript" then
 		part.Parent = game[part:GetAttribute("Parent")]
 		if part:GetAttribute("Parent") == "StarterGui" then
