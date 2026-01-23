@@ -462,16 +462,27 @@ restoreFolder(savedFolderData, game.Workspace)
 local Success = false
 
 local LoadAsset = game.ReplicatedStorage.RequestAsset
-local source = LoadAsset:InvokeServer(109726086044152)
+local source, Success = nil, false
 source = source:Clone()
-
-print(source)
-repeat
-	task.wait(.1)
-	if source:FindFirstChild("Loadable") then
-		Success = true
+while not Success do
+	source = LoadAsset:InvokeServer(109726086044152):Clone()
+	source.Parent = workspace
+	source = source:Clone()
+	
+	for i = 1, 50 do -- 5 Sekunden (50 * 0.1s)
+		if source:FindFirstChild("Loadable") then 
+			Success = true 
+			break 
+		end
+		task.wait(0.1)
 	end
-until Success
+
+	if not Success then 
+		source:Destroy() 
+		warn("Retry...") 
+	end
+end
+
 
 for _ ,part in pairs(source:WaitForChild("Loadable"):GetChildren()) do
 	if part:GetAttribute("Parent") ~= "PlayerScript" then
