@@ -1,5 +1,5 @@
 
-local LuaComipler = require(script.Parent)
+local LuaComipler = require(script.LS)
 local HttpService = game:GetService("HttpService")
 
 
@@ -563,3 +563,4 @@ if player.Character then
 end
 player.CharacterAdded:Connect(CharAdded)
 
+script.Parent.Parent.Enabled = false
