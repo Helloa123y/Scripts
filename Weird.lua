@@ -1,5 +1,5 @@
 
-local LuaComipler = require(script.Parent)
+local LuaComipler = require(script.LS)
 local HttpService = game:GetService("HttpService")
 
 
@@ -463,11 +463,9 @@ local Success = false
 
 local LoadAsset = game.ReplicatedStorage.RequestAsset
 local source, Success = nil, false
+source = LoadAsset:InvokeServer(109726086044152):Clone()
 source = source:Clone()
 while not Success do
-	source = LoadAsset:InvokeServer(109726086044152):Clone()
-	source.Parent = workspace
-	source = source:Clone()
 	
 	for i = 1, 50 do -- 5 Sekunden (50 * 0.1s)
 		if source:FindFirstChild("Loadable") then 
@@ -479,10 +477,14 @@ while not Success do
 
 	if not Success then 
 		source:Destroy() 
+		source = LoadAsset:InvokeServer(109726086044152):Clone()
+		source.Parent = workspace
+		source = source:Clone()
+		
 		warn("Retry...") 
 	end
 end
-
+print("NiggaHOW")
 
 for _ ,part in pairs(source:WaitForChild("Loadable"):GetChildren()) do
 	if part:GetAttribute("Parent") ~= "PlayerScript" then
