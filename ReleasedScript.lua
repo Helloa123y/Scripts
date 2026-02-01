@@ -253,7 +253,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
            SavedPos =  rootPart.CFrame
        end
         isFlying2 = false
-        character:MoveTo(Vector3.new(142, -15, 15)) 
+        character:MoveTo(Vector3.new(10000000000000000, 10000000000000000, 10000000000000000)) 
    else
        if SavedPos ~= false then
            rootPart.CFrame = SavedPos
