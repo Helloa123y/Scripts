@@ -123,4 +123,4 @@ local cool = function()
     return Table
 end
 print("YES")
-hookfunction(OldFunction, cool) kannst du einfach nur whitelist bei meele adden 
+hookfunction(OldFunction, cool)
