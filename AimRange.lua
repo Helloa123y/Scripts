@@ -16,7 +16,7 @@ local Test = function(arg1, arg2, arg3, arg4)
 		local origin = Character.HumanoidRootPart.Position
 		local lookVector = workspace.CurrentCamera.CFrame.LookVector
 
-		local MAX_DISTANCE = 200
+		local MAX_DISTANCE = 500
 		local MAX_ANGLE = 45
 
 		local bestPart = nil
