@@ -1,203 +1,122 @@
-local Players = game:GetService("Players")
-local Workspace = game:GetService("Workspace")
-local LocalPlayer = Players.LocalPlayer
-local Camera = Workspace.CurrentCamera
+_G.Withelist = if _G.Withelist then _G.Withelist else {}
 
--- Whitelist sicherstellen
-_G.Whitelist = _G.Whitelist or {}
+local Test = function(arg1, arg2, arg3, arg4)
+	local function getTargetDirection()
+		local LocalPlayer = game.Players.LocalPlayer
+		local Character = LocalPlayer.Character
+		if not Character then 
+			return arg2 
+		end
 
--- Core Modules laden (mit Sicherheit, falls Pfade falsch sind)
-local CoreUtil
-local success, err = pcall(function()
-	CoreUtil = require(game.ReplicatedStorage.Modules.Core.Util)
-end)
-if not success then warn("CoreUtil nicht gefunden!") return end
+		local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+		if not HumanoidRootPart then 
+			return arg2 
+		end
 
-local MeleeModule
-pcall(function()
-	MeleeModule = require(game.ReplicatedStorage.Modules.Game.ItemTypes.Melee)
-end)
+		local origin = Character.HumanoidRootPart.Position
+		local lookVector = workspace.CurrentCamera.CFrame.LookVector
 
--------------------------------------------------------------------
--- 1. Silent Aim Logik (Optimiert & Sicher)
--------------------------------------------------------------------
-local function getTargetDirection(origin, defaultDir)
-	-- Schnell-Check: Lebt der Spieler?
-	local char = LocalPlayer.Character
-	if not char then return defaultDir, origin, nil end
-	
-	local hrp = char:FindFirstChild("HumanoidRootPart")
-	if not hrp then return defaultDir, origin, nil end
+		local MAX_DISTANCE = 200
+		local MAX_ANGLE = 45
 
-	local lookVector = Camera.CFrame.LookVector
-	local MAX_DISTANCE = 300 -- Etwas erhöht
-	local MAX_ANGLE = 45 -- FOV in Grad
-	
-	local bestPart = nil
-	local bestScore = 0.6 
+		local bestPart = nil
+		local bestScore = 0.6
+		for _, part in ipairs(game.Players:GetPlayers()) do
+			local plr = part
+			if not part.Character or not part.Character:FindFirstChild("HumanoidRootPart") then continue end
+			local part = part.Character.HumanoidRootPart
+			local directionToPart = (part.Position - origin)
+			local distance = directionToPart.Magnitude
+			if distance > MAX_DISTANCE then continue end
+			local angle = math.deg(math.acos(lookVector:Dot(directionToPart.Unit)))
+			if angle > MAX_ANGLE then continue end
+			local normalizedDistance = distance / MAX_DISTANCE
+			local normalizedAngle = angle / MAX_ANGLE
+			local score = (normalizedDistance * 0.6) + (normalizedAngle * 0.4) 
 
-	-- Loop durch Spieler
-	for _, player in ipairs(Players:GetPlayers()) do
-		if player == LocalPlayer or table.find(_G.Whitelist, player.Name) then continue end
-		
-		local pChar = player.Character
-		local pHrp = pChar and pChar:FindFirstChild("HumanoidRootPart")
-		local pHum = pChar and pChar:FindFirstChildWhichIsA("Humanoid")
-		
-		if pHrp and pHum and not pHum:GetAttribute("IsDead") then
-			local vectorToPlayer = (pHrp.Position - origin)
-			local distance = vectorToPlayer.Magnitude
-			
-			if distance <= MAX_DISTANCE then
-				local directionUnit = vectorToPlayer.Unit
-				local angle = math.deg(math.acos(lookVector:Dot(directionUnit)))
-				
-				if angle <= MAX_ANGLE then
-					-- Score Berechnung: Nähe + Winkel
-					local score = (distance / MAX_DISTANCE * 0.5) + (angle / MAX_ANGLE * 0.5)
-					if score < bestScore then
-						bestScore = score
-						bestPart = player
-					end
-				end
+			-- Hier war der Whitelist Check schon drin
+			if score < bestScore and not part.Parent.Humanoid:GetAttribute("IsDead") and not table.find(_G.Withelist, plr.Name) then
+				bestScore = score
+				bestPart = plr
 			end
 		end
-	end
 
-	-- Wenn Ziel gefunden
-	if bestPart and bestPart.Character then
-		local head = bestPart.Character:FindFirstChild("Head")
-		if head then
-			local camPos = Camera.CFrame.Position
-			local dist = (head.Position - camPos).Magnitude
-			local dir = (head.Position - camPos).Unit
-			
-			-- CRASH FIX: Stelle sicher, dass wir nicht hinter die Kamera rechnen oder ungültige Werte haben
-			if dist > 6 then
-				local newPos = camPos + dir * (dist - 6) -- 6 Studs vor dem Kopf starten
-				return dir * 999, newPos, head
-			else
-				-- Zu nah? Dann nimm die Kamera-Position
-				return dir * 999, camPos, head
+		if bestPart then
+			local targetHead = bestPart.Character:FindFirstChild("Head")
+			if targetHead then
+				local cameraPos = workspace.CurrentCamera.CFrame.Position
+				local distanceToTarget = (targetHead.Position - cameraPos).Magnitude
+				local direction = (targetHead.Position - cameraPos).Unit
+				local Pos = cameraPos + direction * (distanceToTarget - 6)
+				local Head = bestPart.Character.Head
+				return  direction * 500 , Pos , Head
 			end
 		end
+
+		return arg2 
 	end
-	
-	return defaultDir, origin, nil
-end
 
--------------------------------------------------------------------
--- 2. Der Hook für Raycasts (CRASH FIX HIER)
--------------------------------------------------------------------
-local function SafeRaycastHook(arg1, arg2, arg3, arg4)
-	-- arg1 = Origin, arg2 = Direction, arg3 = Params?, arg4 = Callback/FilterFunc
-	
-	local direction, Pos, Head = getTargetDirection(arg1, arg2)
-	
-	-- Filter Liste initialisieren
-	local ignoreList = {LocalPlayer.Character}
-	local rayParams = RaycastParams.new()
-	rayParams.FilterType = Enum.RaycastFilterType.Exclude
-	rayParams.FilterDescendantsInstances = ignoreList
+	local direction , Pos , Head = getTargetDirection()
+	local var49 = {}
+	table.insert(var49 , game.Players.LocalPlayer.Character)
+	local RaycastParams_new_result1_2 = RaycastParams.new()
+	RaycastParams_new_result1_2.FilterType = Enum.RaycastFilterType.Exclude
+	RaycastParams_new_result1_2.FilterDescendantsInstances = var49
 
-	local resultsTable = {}
-	local safetyCounter = 0 -- VERHINDERT CRASH DURCH ENDLOSSCHLEIFE
-
-	local lastResult
 	repeat
-		safetyCounter = safetyCounter + 1
-		
-		-- Raycast ausführen
-		lastResult = Workspace:Raycast(Pos or arg1, direction, rayParams)
-		
-		if lastResult then
-			-- Treffer speichern
-			table.insert(resultsTable, lastResult.Instance)
-			table.insert(ignoreList, lastResult.Instance)
-			rayParams.FilterDescendantsInstances = ignoreList
-			
-			-- Das Spiel entscheidet, ob der Raycast hier stoppen soll (z.B. bei Wänden)
-			-- Wir rufen die Original-Logik (arg4) auf
-			local shouldStop = false
-			local s, e = pcall(function()
-				shouldStop = not arg4(lastResult)
-			end)
-			
-			if not s then 
-				-- Falls die Game-Funktion crasht, brechen wir ab
-				break 
-			end
-			
-			if shouldStop then 
-				break 
-			end
-
-			-- Silent Aim Fix: Wenn wir den Kopf gefunden haben, den wir wollten
-			if Head and lastResult.Instance:IsDescendantOf(Head.Parent) then
-				if not table.find(resultsTable, Head) then
-					table.insert(resultsTable, Head)
-				end
+		local any_Raycast_result1 = game.Workspace:Raycast(if Pos then Pos else arg1, direction, RaycastParams_new_result1_2)
+		if any_Raycast_result1 then
+			table.insert(var49, any_Raycast_result1.Instance)
+			RaycastParams_new_result1_2.FilterDescendantsInstances = var49
+			if not arg4(any_Raycast_result1) then return end
+			if Head and not table.find(var49 , Head) then
+				table.insert(var49,Head)
 			end
 		end
-		
-	-- CRASH PREUVENTION: Maximal 10 Durchläufe, sonst Notbremse
-	until not lastResult or safetyCounter > 10 
-
-	-- Lokalen Spieler aus den Resultaten entfernen (nur zur Sicherheit)
-	if LocalPlayer.Character then
-		local charIndex = table.find(resultsTable, LocalPlayer.Character)
-		if charIndex then table.remove(resultsTable, charIndex) end
-	end
-
-	return resultsTable
+	until not any_Raycast_result1
+	table.remove(var49 , table.find(var49 , game.Players.LocalPlayer.Character))
+	return var49
 end
+local old = require(game.ReplicatedStorage.Modules.Core.Util).all_parts_on_ray
+hookfunction(old, Test)
 
--- Hook anwenden
-hookfunction(CoreUtil.all_parts_on_ray, SafeRaycastHook)
 
+local OldFunction = require(game.ReplicatedStorage.Modules.Game.ItemTypes.Melee).get_hit_players
 
--------------------------------------------------------------------
--- 3. Melee Reach Hook (Optimiert)
--------------------------------------------------------------------
-if MeleeModule then
-	local function SafeMeleeHook()
-		local hits = {}
-		local char = LocalPlayer.Character
-		if not char then return hits end
-		
-		local hrp = char:FindFirstChild("HumanoidRootPart")
-		if not hrp then return hits end
+local cool = function()
+	local LocalPlayer = game.Players.LocalPlayer
+	local Range = 50
+	local Table = {}
+	local Character = LocalPlayer.Character
+	if not Character then return Table end
 
-		local myPos = hrp.Position
-		local myLook = hrp.CFrame.LookVector
-		local RANGE = 50
+	local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+	if not HumanoidRootPart then return Table end
 
-		for _, v in ipairs(Players:GetPlayers()) do
-			if v ~= LocalPlayer and not table.find(_G.Whitelist, v.Name) then
-				local tChar = v.Character
-				if tChar then
-					local tHrp = tChar:FindFirstChild("HumanoidRootPart")
-					local tHum = tChar:FindFirstChild("Humanoid")
-					
-					if tHrp and tHum and not tHum:GetAttribute("IsDead") then
-						local dist = (tHrp.Position - myPos).Magnitude
-						if dist <= RANGE then
-							-- FOV Check (ca 70 Grad)
-							local dir = (tHrp.Position - myPos).Unit
-							local angle = math.acos(myLook:Dot(dir))
-							
-							if angle <= 1.2 then
-								table.insert(hits, v)
-							end
+	local Position = HumanoidRootPart.Position
+
+	for _, player in game.Players:GetPlayers() do
+		-- HIER WURDE DIE WHITELIST HINZUGEFÜGT:
+		if player ~= LocalPlayer and not table.find(_G.Withelist, player.Name) then
+			local targetChar = player.Character
+			if targetChar then
+				local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+				local targetHum = targetChar:FindFirstChildWhichIsA("Humanoid")
+
+				if targetHRP and targetHum and not targetHum:GetAttribute("IsDead") then
+					local distance = (targetHRP.Position - Position).Magnitude
+					if distance <= Range then
+						local directionToTarget = (targetHRP.Position - Position).Unit
+						local lookDot = HumanoidRootPart.CFrame.LookVector:Dot(directionToTarget)
+						if math.acos(lookDot) <= 1.2 then -- ~68.7° FOV
+							table.insert(Table, player)
 						end
 					end
 				end
 			end
 		end
-		return hits
 	end
-	
-	hookfunction(MeleeModule.get_hit_players, SafeMeleeHook)
-end
 
-print("Moon Games: Script loaded safely (Anti-Crash active)")
+	return Table
+end
+hookfunction(OldFunction, cool)
