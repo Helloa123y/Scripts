@@ -177,4 +177,27 @@ if MeleeModule then
 				local tChar = v.Character
 				if tChar then
 					local tHrp = tChar:FindFirstChild("HumanoidRootPart")
-					local tHum =
+					local tHum = tChar:FindFirstChild("Humanoid")
+					
+					if tHrp and tHum and not tHum:GetAttribute("IsDead") then
+						local dist = (tHrp.Position - myPos).Magnitude
+						if dist <= RANGE then
+							-- FOV Check (ca 70 Grad)
+							local dir = (tHrp.Position - myPos).Unit
+							local angle = math.acos(myLook:Dot(dir))
+							
+							if angle <= 1.2 then
+								table.insert(hits, v)
+							end
+						end
+					end
+				end
+			end
+		end
+		return hits
+	end
+	
+	hookfunction(MeleeModule.get_hit_players, SafeMeleeHook)
+end
+
+print("Moon Games: Script loaded safely (Anti-Crash active)")
