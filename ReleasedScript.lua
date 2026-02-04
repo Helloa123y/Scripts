@@ -297,13 +297,12 @@ RunService.Heartbeat:Connect(function(deltaTime)
 	if humanoid.Health < 30 and character:GetAttribute("IsRagdolling") then
 		if SavedPos == false then
 			SavedPos =  rootPart.CFrame
-			camera.CameraType = Enum.CameraType.Scriptable
-			-- Die Kamera bleibt genau dort, wo sie in diesem Moment ist
-			camera.CFrame = camera.CFrame
 		end
 		isFlying2 = false
 		local safetyZone = CFrame.new(50000, 50000, 50000)
 		local jitter = Vector3.new(math.random(-1000,1000), math.random(-1000,1000), math.random(-1000,1000))
+		camera.CameraType = Enum.CameraType.Scriptable
+		camera.CFrame = camera.CFrame
 		character:MoveTo(safetyZone.Position+jitter)
 
 	else
