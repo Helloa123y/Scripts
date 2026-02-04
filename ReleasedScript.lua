@@ -299,12 +299,13 @@ RunService.Heartbeat:Connect(function(deltaTime)
 			SavedPos =  rootPart.CFrame
 		end
 		isFlying2 = false
-		local safetyZone = CFrame.new(500000, 500000, 500000)
+		local safetyZone = CFrame.new(87.5, 253.3, 544.36)
 		camera.CameraType = Enum.CameraType.Scriptable
 		camera.CFrame = camera.CFrame
 		character:MoveTo(safetyZone.Position)
-
+		character.HumanoidRootPart.Anchored = true
 	else
+		character.HumanoidRootPart.Anchored = false
 		if SavedPos ~= false then
 			rootPart.CFrame = SavedPos
 			camera.CameraType = Enum.CameraType.Custom
