@@ -23,7 +23,7 @@ local function addESP(player)
         Box = createDrawing("Square", {Thickness = 2, Color = Color3.new(1, 1, 1), Filled = false, Visible = false}),
         -- Text deutlich größer (Size 22) und Center auf true
         Name = createDrawing("Text", {
-            Size = 22, 
+            Size = 30, 
             Center = true, 
             Outline = true, 
             OutlineColor = Color3.new(0, 0, 0), -- Schwarzer Rand für Lesbarkeit
@@ -84,7 +84,7 @@ RunService.RenderStepped:Connect(function()
                 if onScreen then
                     local isArmed = hasWeapon(player)
                     local color = isArmed and Color3.new(1, 0, 0) or Color3.new(1, 1, 1)
-                    local statusText = isArmed and " [GEFAHR]" or ""
+                    local statusText = isArmed and " [Armed]" or ""
 
                     -- Box Skalierung
                     local sizeX = 2000 / pos.Z
