@@ -1,9 +1,6 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Camera = workspace.CurrentCamera
-
-local TARGET_ATTRIBUTE = "AmmoType"
-
 -- Speicher für die Zeichnungen
 local ESP_DATA = {}
 
