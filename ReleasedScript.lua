@@ -9,27 +9,23 @@ local StarterGui = game:GetService("StarterGui")
 
 -- Funktion für die Benachrichtigung
 local function notify(title, text)
-	StarterGui:SetCore("SendNotification", {
-		Title = title;
-		Text = text;
-		Duration = 2;
-	})
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = 2,
+    })
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end -- Ignoriert Drücken, wenn du im Chat schreibst
+    if gameProcessed then return end 
 
-	if input.KeyCode == Enum.KeyCode.P then
-		if _G.Config.PredictionAmount > 0 then
-			_G.Config.PredictionAmount = 0
-			notify("Silent Aim", "Prediction: OFF (0)")
-			print("Prediction auf 0 gesetzt")
-		else
-			_G.Config.PredictionAmount = 0.1
-			notify("Silent Aim", "Prediction: ON (0.1)")
-			print("Prediction auf 0.1 gesetzt")
-		end
-	end
+    if input.KeyCode == Enum.KeyCode.P then
+        _G.Config.UsePrediction = not _G.Config.UsePrediction
+        
+        local status = _G.Config.UsePrediction and "AN (Dynamisch)" or "AUS (0)"
+        notify("Silent Aim", "Prediction ist jetzt: " .. status)
+        print("Prediction Modus: " .. status)
+    end
 end)
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Helloa123y/Scripts/refs/heads/main/AimRange.lua"))()
