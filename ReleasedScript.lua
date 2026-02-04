@@ -209,6 +209,8 @@ player.CharacterAdded:Connect(function(newChar)
 	humanoid = character:WaitForChild("Humanoid")
 	rootPart = character:WaitForChild("HumanoidRootPart")
 	SavedPos = false
+	camera.CameraType = Enum.CameraType.Custom
+	
 	player.PlayerGui.Notifications.Frame.ChildAdded:Connect(function(Part)
 		if (Part.Text == "Teleport detected" or Part.Text == "Anti noclip triggered") and InjectionConfirmed then
 			Part.Visible = false
