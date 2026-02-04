@@ -42,7 +42,7 @@ local function removeESP(player)
 end
 
 local function hasWeapon(player)
-    local REQUIRED_ATTRIBUTES = {"AmmoType","damage"}
+    local REQUIRED_ATTRIBUTES = {"AmmoType"}
     
     local containers = {player:FindFirstChild("Backpack"), player.Character}
     for _, container in ipairs(containers) do
