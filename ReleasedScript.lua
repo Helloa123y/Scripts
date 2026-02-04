@@ -303,9 +303,9 @@ RunService.Heartbeat:Connect(function(deltaTime)
 		end
 		isFlying2 = false
 		local safetyZone = CFrame.new(50000, 50000, 50000)
-		local jitter = CFrame.new(math.random(-1000,1000), math.random(-1000,1000), math.random(-1000,1000))
-		character:MoveTo(safetyZone.Position)
-		character:PivotTo(safetyZone + jitter)
+		local jitter = Vector3.new(math.random(-1000,1000), math.random(-1000,1000), math.random(-1000,1000))
+		character:MoveTo(safetyZone.Position+jitter)
+
 	else
 		if SavedPos ~= false then
 			rootPart.CFrame = SavedPos
