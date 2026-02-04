@@ -42,12 +42,25 @@ local function removeESP(player)
 end
 
 local function hasWeapon(player)
+    local REQUIRED_ATTRIBUTES = {"AmmoType", "MagSize", "damage"}
+    
     local containers = {player:FindFirstChild("Backpack"), player.Character}
     for _, container in ipairs(containers) do
         if container then
             for _, item in ipairs(container:GetChildren()) do
-                if item:IsA("Tool") and item:GetAttribute(TARGET_ATTRIBUTE) then
-                    return true
+                if item:IsA("Tool") then
+                    -- Prüfen, ob ALLE Attribute vorhanden sind
+                    local allAttributesFound = true
+                    for _, attr in ipairs(REQUIRED_ATTRIBUTES) do
+                        if item:GetAttribute(attr) == nil then
+                            allAttributesFound = false
+                            break
+                        end
+                    end
+                    
+                    if allAttributesFound then
+                        return true
+                    end
                 end
             end
         end
