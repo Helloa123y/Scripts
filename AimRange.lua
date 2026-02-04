@@ -12,6 +12,13 @@ _G.FOVCircle.Visible = true
 
 _G.FOVCircle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y / 2)
 
+_G.currentPing = 10
+task.spawn(function()
+	while task.wait(5) do
+		local stats = game:GetService("Stats")
+		_G.currentPing = stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+	end
+end)
 
 local Test = function(arg1, arg2, arg3, arg4)
 	local Camera = workspace.CurrentCamera
@@ -59,14 +66,10 @@ local Test = function(arg1, arg2, arg3, arg4)
 						if score < bestScore then
 							bestScore = score
 							bestPlayer = plr
-							local stats = game:GetService("Stats")
-							local currentPing = stats.Network.ServerStatsItem["Data Ping"]:GetValue()
-							if typeof(currentPing) ~= "number" then
-								currentPing = stats.Network.ServerStatsItem["Data Ping"]:GetValue()
-							end
+				
 							local dynamicPrediction = _G.Config.DefaultPrediction
 							for _, step in ipairs(_G.Config.PingPredictionTable) do
-								if currentPing <= step[1] then
+								if _G.currentPing <= step[1] then
 									dynamicPrediction = step[2]
 									break
 								end
