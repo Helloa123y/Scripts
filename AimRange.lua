@@ -1,199 +1,383 @@
-_G.Withelist =  if _G.Withelist then _G.Withelist else {}
+--_G.FlySpeed = 68
+if _G.FlySpeed then
+	return
+end
+_G.FlySpeed = 68
 
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 
+-- Funktion für die Benachrichtigung
+local function notify(title, text)
+	StarterGui:SetCore("SendNotification", {
+		Title = title,
+		Text = text,
+		Duration = 2,
+	})
+end
 
-_G.FOVCircle = Drawing.new("Circle")
-_G.FOVCircle.Thickness = 2
-_G.FOVCircle.Color = Color3.fromRGB(255, 255, 255)
-_G.FOVCircle.Filled = false
-_G.FOVCircle.Transparency = 0.5
-_G.FOVCircle.Radius = _G.Config.FOVRadius -- Das ist die Größe deines "Aimbot-Fensters"
-_G.FOVCircle.Visible = true
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end 
 
-_G.FOVCircle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y / 2)
+	if input.KeyCode == Enum.KeyCode.P then
+		_G.Config.UsePrediction = not _G.Config.UsePrediction
 
-_G.currentPing = 10
-task.spawn(function()
-	while task.wait(5) do
-		local stats = game:GetService("Stats")
-		_G.currentPing = stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+		local status = _G.Config.UsePrediction and "AN (Dynamisch)" or "AUS (0)"
+		notify("Silent Aim", "Prediction ist jetzt: " .. status)
+		print("Prediction Modus: " .. status)
 	end
 end)
 
-local Test = function(arg1, arg2, arg3, arg4)
-	local Camera = workspace.CurrentCamera
-	local LocalPlayer = game.Players.LocalPlayer
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Helloa123y/Scripts/refs/heads/main/AimRange.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Helloa123y/Scripts/refs/heads/main/esp.lua"))()
+-- Hook ContentProvider.PreloadAsync to prevent some potential crashes
+hookfunction(game:GetService("ContentProvider").PreloadAsync, function(...) end)
 
-	-- :: HILFSFUNKTION: Das beste Ziel finden :: --
-	local function getBestTarget()
-		local bestPlayer = nil
-		local bestScore = math.huge
-		local finalPredictedPos = nil
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
 
-		local mousePos = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+local humanoid = character:WaitForChild("Humanoid")
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local camera = workspace.CurrentCamera
+local masterControl = require(player.PlayerScripts:WaitForChild("PlayerModule"):WaitForChild("ControlModule"))
 
-		for _, plr in ipairs(game.Players:GetPlayers()) do
-			if plr == LocalPlayer or table.find(_G.Withelist or {}, plr.Name) then continue end
 
-			local char = plr.Character
-			local head = char and char:FindFirstChild("Head")
-			local hum = char and char:FindFirstChild("Humanoid")
-			local root = char and char:FindFirstChild("HumanoidRootPart")
-
-			if head and hum and root and hum.Health > 0 then
-
-				-- 1. Distanz Check (Welt)
-				local distToPlayer = (root.Position - Camera.CFrame.Position).Magnitude
-				if distToPlayer > _G.Config.MaxDistance then continue end
-
-				-- 2. FOV Check (Bildschirm)
-				local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-				if onScreen then
-					local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
-
-					if distToMouse <= _G.Config.FOVRadius then
-
-						-- :: DAS SCORING SYSTEM :: --
-						-- Wir kombinieren Maus-Nähe und Distanz zum Gegner.
-						-- Score = (MausAbstand) + (WeltAbstand * Gewichtung)
-						local score = distToMouse + (distToPlayer * _G.Config.DistanceWeight)
-
-						-- HP Logik: Leichte Strafe für Low HP, aber kein Ausschluss!
-						if _G.Config.AvoidLowHP and hum.Health < _G.Config.LowHPThreshold then
-							score = score + _G.Config.LowHPPenalty
-						end
-					
-						if score < bestScore then
-							bestScore = score
-							bestPlayer = plr
-							local dynamicPrediction = _G.Config.DefaultPrediction
-							if _G.Config.UsePrediction then
-								for _, step in ipairs(_G.Config.PingPredictionTable) do
-									if _G.currentPing <= step[1] then
-										dynamicPrediction = step[2]
-										break
-									end
-								end
-							else
-								dynamicPrediction = 0
-							end
-						
-							finalPredictedPos = head.Position + (root.Velocity * dynamicPrediction)
-						end
-					end
-				end
-			end
-		end
-
-		return bestPlayer, finalPredictedPos
-	end
-
-	-- 1. Ziel suchen
-	local targetPlayer, predictedPos = getBestTarget()
-
-	-- 2. Wenn Ziel gefunden -> Silent Aim (Spoofing)
-	if targetPlayer and predictedPos then
-		local targetHead = targetPlayer.Character.Head
-		local camPos = Camera.CFrame.Position
-
-		-- Startpunkt leicht versetzt für Wallcheck-Bypass
-		local directionToPred = (predictedPos - camPos).Unit
-		local distToPred = (predictedPos - camPos).Magnitude
-		-- :: VISUAL BEAM :: --
-		task.spawn(function()
-			local beam = Instance.new("Part")
-			beam.Parent = workspace
-			beam.Anchored = true
-			beam.CanCollide = false
-			beam.CanQuery = false
-			beam.Material = Enum.Material.Neon
-			beam.Color = Color3.fromRGB(255, 0, 0) -- Rot für Aggressiv
-			beam.Transparency = 0.4
-			beam.Size = Vector3.new(0.05, 0.05, distToPred) -- Dünner Beam
-			beam.CFrame = CFrame.lookAt(camPos, predictedPos) * CFrame.new(0, 0, -distToPred/2)
-
-			game:GetService("Debris"):AddItem(beam, 1.5) -- Automatisches Löschen
-		end)
-
-		-- Fake Result erstellen
-		local fakeResult = {
-			Instance = targetHead,
-			Position = predictedPos, -- Wir treffen dort, wo er sein wird!
-			Normal = -directionToPred, -- Realistische Einschlagrichtung
-			Material = targetHead.Material,
-			Distance = distToPred
+local Net = require(ReplicatedStorage.Modules.Core.Net)
+hookfunction(getfenv , function(lvl)
+	if lvl == 3 then
+		return {
+			getgenv = nil,
+			identifyexecutor = nil
 		}
-
-		-- Dem Spiel den Treffer melden
-		arg4(fakeResult)
-
-		-- Rückgabe an das Waffensystem
-		return {targetHead}
 	end
-
-	-- 3. Fallback: Normaler Raycast (wenn kein Ziel im FOV)
-	-- Hier nutzen wir den ursprünglichen Raycast des Spiels, damit man normal schießen kann
-	local ignoreList = {LocalPlayer.Character}
-	local rayParams = RaycastParams.new()
-	rayParams.FilterType = Enum.RaycastFilterType.Exclude
-	rayParams.FilterDescendantsInstances = ignoreList
-
-	-- Die Richtung aus den Argumenten nutzen (wohin du wirklich zielst)
-	local originalDirection = arg2 
-	-- Falls arg2 keine Direction ist, müssen wir raten. Meist ist arg2 direction.
-	-- Wenn arg2 nil ist, nutzen wir Kamera Blickrichtung
-	if typeof(originalDirection) ~= "Vector3" then 
-		originalDirection = Camera.CFrame.LookVector * 2000 
-	end
-
-	local result = workspace:Raycast(arg1, originalDirection, rayParams)
-
-	-- Wenn der normale Raycast etwas trifft, geben wir das zurück
-	if result then
-		if not arg4(result) then return {} end -- Original Logik beibehalten
-		return {result.Instance}
-	end
-
-	return {}
-end
-
-local old = require(game.ReplicatedStorage.Modules.Core.Util).all_parts_on_ray
-print("Yes")
-hookfunction(old, Test)
+	return getgenv(lvl)
+end)
 
 
-local OldFunction = require(game.ReplicatedStorage.Modules.Game.ItemTypes.Melee).get_hit_players
+local flySpeed = 85
+local maxDistance = 20
+local isFlying = false
+local canMove = true
+local startPosition = rootPart.Position
+local spamFActive = false -- Flag for F spamming
+local spamFInterval = 0.1 -- Interval between F presses in seconds
+local Car = nil
+local Injected = false
+local InjectionConfirmed = false
 
-local cool = function()
-	local LocalPlayer = game.Players.LocalPlayer
-	local Range = 50
-	local Table = {}
-	local Character = LocalPlayer.Character
-	if not Character then return Table end
+player.CharacterAdded:Connect(function(newChar)
+	character = newChar
+	humanoid = character:WaitForChild("Humanoid")
+	rootPart = character:WaitForChild("HumanoidRootPart")
+	camera = workspace.CurrentCamera
+	Injected = false
+	InjectionConfirmed = false
+end)
 
-	local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-	if not HumanoidRootPart then return Table end
 
-	local Position = HumanoidRootPart.Position
-
-	for _, player in game.Players:GetPlayers() do
-		if player ~= LocalPlayer and not table.find(_G.Withelist, player.Name) then
-			local targetChar = player.Character
-			if targetChar then
-				local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
-				local targetHum = targetChar:FindFirstChildWhichIsA("Humanoid")
-
-				if targetHRP and targetHum and not targetHum:GetAttribute("IsDead") then
-					local distance = (targetHRP.Position - Position).Magnitude
-					if distance <= Range then
-						table.insert(Table, player)
+local function PutPlayerCar()
+	if not isFlying then return end
+	for _, vehicle in pairs(game.Workspace.Vehicles:GetChildren()) do
+		if vehicle:GetAttribute("OwnerUserId") == player.UserId then
+			Car = vehicle.PrimaryPart
+			for _, seat in pairs(vehicle:GetDescendants()) do
+				if seat:IsA("BasePart") then
+					seat.CanCollide = false
+				end
+				if seat.Name == "DrivePrompt" then
+					vehicle.PrimaryPart.Anchored = false
+					while not player.Character.Humanoid.Sit and isFlying do
+						vehicle:SetPrimaryPartCFrame(player.Character.HumanoidRootPart.CFrame * CFrame.new(0, -3.5 - 0.009, 0))
+						fireproximityprompt(seat)
+						for _, part in pairs(vehicle:GetDescendants()) do
+							if part:IsA("BasePart") then
+								part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+								part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+							end
+						end
+						task.wait()
 					end
+					vehicle.PrimaryPart.Anchored = true
 				end
 			end
 		end
 	end
-
-	return Table
 end
-print("YES")
-hookfunction(OldFunction, cool)  -- ayri
+local function toggleFlying()
+
+	PutPlayerCar()
+	if isFlying then
+		humanoid.PlatformStand = true
+		humanoid.EvaluateStateMachine = false
+		rootPart.Anchored = true
+		startPosition = rootPart.Position
+		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+		camera.CameraType = Enum.CameraType.Custom
+	else
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+		humanoid.PlatformStand = false
+		humanoid.EvaluateStateMachine = true
+	end
+end
+
+local Height = 0
+local SpecialCF = nil
+
+local function GPressed()
+	if InjectionConfirmed then
+		return
+	end
+	isFlying = true
+	Height = rootPart.Position.Y
+	coroutine.wrap(toggleFlying)()
+	task.wait(1)
+	isFlying = false
+	while true do
+		humanoid.PlatformStand = false
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+		isFlying = false
+		task.wait(0.1)
+		if not humanoid.PlatformStand then
+			break
+		end
+	end
+	while true do
+		rootPart.Anchored = false
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+		isFlying = false
+		task.wait(0.1)
+		if not rootPart.Anchored then
+			break
+		end
+	end
+	if (rootPart.Position - Car.Position).Magnitude > 20 or humanoid.Sit or math.abs(rootPart.Position.Y - Height) > 20  then
+		Net.send("request_respawn")
+	else
+		Injected = true
+		warn("Injected")
+	end
+end
+local function confirm()
+	if Injected and not InjectionConfirmed then
+		InjectionConfirmed = true
+		warn("ComfirmedSuccess")
+	end
+end
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if input.KeyCode == Enum.KeyCode.G and not gameProcessed then -- Press G to start/stop F spamming
+		GPressed()
+	elseif input.KeyCode == Enum.KeyCode.M then
+		confirm()
+	end
+end)
+
+local function freezeMovement()
+	canMove = false
+	rootPart.Anchored = false
+	PutPlayerCar()
+	camera.CameraSubject = humanoid
+	UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+	humanoid.PlatformStand = true
+	rootPart.Anchored = true
+	startPosition = rootPart.Position
+	canMove = true
+end
+
+
+RunService.Heartbeat:Connect(function(deltaTime)
+	if not isFlying or not rootPart or not humanoid or not canMove then return end
+	rootPart.CFrame = CFrame.new(Vector3.new(rootPart.Position.X, Height - 30, rootPart.Position.Z), rootPart.CFrame.LookVector + rootPart.Position)
+	if (rootPart.Position - startPosition).Magnitude > maxDistance then
+		freezeMovement()
+	end
+end)
+
+
+-- Flug-Einstellungen
+local isFlying2 = false
+local flySpeed = 45
+local camera = workspace.CurrentCamera
+
+-- Handle Charakter-Wechsel
+local SavedPos = false
+player.CharacterAdded:Connect(function(newChar)
+	character = newChar
+	humanoid = character:WaitForChild("Humanoid")
+	rootPart = character:WaitForChild("HumanoidRootPart")
+	SavedPos = false
+	camera.CameraType = Enum.CameraType.Custom
+	
+	player.PlayerGui.Notifications.Frame.ChildAdded:Connect(function(Part)
+		if (Part.Text == "Teleport detected" or Part.Text == "Anti noclip triggered") and InjectionConfirmed then
+			Part.Visible = false
+		end
+	end)
+end)
+
+-- Remote
+local Send = ReplicatedStorage.Remotes.Send -- RemoteEvent
+
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+
+	if input.KeyCode == Enum.KeyCode.Plus or input.KeyCode == Enum.KeyCode.KeypadPlus then
+		_G.Config.AntiTPReturn = not _G.Config.AntiTPReturn
+
+		local status = _G.Config.AntiTPReturn and "AKTIVIERT" or "DEAKTIVIERT"
+		notify("Anti-TP", "Auto-Return ist jetzt: " .. status)
+	end
+end)
+
+Send.OnClientEvent:Connect(function(n, y, m)
+	-- Wenn der Schalter AUS ist, machen wir gar nichts
+	if not _G.Config.AntiTPReturn then return end
+
+	if m == "Teleport detected" and InjectionConfirmed then
+		if humanoid.Health < 30 and character:GetAttribute("IsRagdolling") then
+			return
+		end
+
+		-- Nur zurückteleportieren, wenn Car existiert
+		if Car then
+			SpecialCF = Car.CFrame
+			rootPart.CFrame = SpecialCF
+		end
+	end
+end)
+-- Flug umschalten mit F
+
+local CFRoot =  rootPart.CFrame
+
+local function fly()
+	isFlying2 = not isFlying2
+
+	if isFlying2 then
+		humanoid.PlatformStand = true
+		UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+		CFRoot =  rootPart.CFrame
+
+		for _, seat in pairs(Car.Parent:GetDescendants()) do
+			if seat:IsA("BasePart") then
+				seat.CanCollide = true
+			end
+		end
+	else
+		humanoid.PlatformStand = false
+		UserInputService.MouseBehavior = Enum.MouseBehavior.Default
+		rootPart.Anchored = false
+		for _, part in pairs(character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+				part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+			end
+		end
+	end
+end
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if input.KeyCode == Enum.KeyCode.F and not gameProcessed  then
+		fly()
+	end
+end)
+
+-- Flug-Logik
+
+
+RunService.Heartbeat:Connect(function(deltaTime)
+	if not InjectionConfirmed then return end
+	Car.Anchored = true
+	if character then 
+		camera.CameraSubject = character.HumanoidRootPart
+	end
+	if humanoid.Health < 30 and character:GetAttribute("IsRagdolling") then
+		if SavedPos == false then
+			SavedPos =  rootPart.CFrame
+			camera.CameraType = Enum.CameraType.Scriptable
+			-- Die Kamera bleibt genau dort, wo sie in diesem Moment ist
+			camera.CFrame = camera.CFrame
+		end
+		isFlying2 = false
+		character:MoveTo(Vector3.new(10000000000000000, 10000000000000000, 10000000000000000)) 
+	else
+		if SavedPos ~= false then
+			rootPart.CFrame = SavedPos
+			camera.CameraType = Enum.CameraType.Custom
+		end
+		SavedPos = false
+	end
+	if not isFlying2 or not rootPart or not humanoid then return end
+	UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
+	local gameProcessingInput = UserInputService:GetFocusedTextBox() ~= nil
+	local moveDirection = Vector3.new()
+
+	if not gameProcessingInput then
+		local direction = masterControl:GetMoveVector()
+		if direction.Z > 0.5 then moveDirection -= camera.CFrame.LookVector end -- W
+		if direction.Z < -0.5 then moveDirection += camera.CFrame.LookVector end -- S
+		if direction.X > 0.5 then moveDirection += camera.CFrame.RightVector end -- D
+		if direction.X < -0.5 then moveDirection -= camera.CFrame.RightVector end -- A
+
+		if UserInputService:IsKeyDown(Enum.KeyCode.Space) then moveDirection += Vector3.new(0, 1, 0) end
+		if UserInputService:IsKeyDown(Enum.KeyCode.LeftControl) then moveDirection -= Vector3.new(0, 1, 0) end
+	end
+
+	-- Normalisiere die Richtung (vermeidet schnelleres Diagonal-Fliegen)
+	if moveDirection.Magnitude > 0 then
+		moveDirection = moveDirection.Unit
+	end
+	if SpecialCF then
+		rootPart.CFrame = SpecialCF
+		CFRoot = SpecialCF
+		SpecialCF = nil
+	else
+		CFRoot = CFRoot + (moveDirection * _G.FlySpeed * deltaTime)
+
+		-- Blickrichtung an Mausbewegung anpassen
+		CFRoot = CFrame.new(CFRoot.Position, CFRoot.Position + camera.CFrame.LookVector)
+		rootPart.CFrame = CFRoot
+	end
+	-- CFrame-Update mit sanfter Bewegung
+end)
+
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "ButtonGui"
+screenGui.Parent = playerGui
+screenGui.ResetOnSpawn = false
+-- Button-Eigenschaften
+local buttonSize = UDim2.new(0, 150, 0, 50)
+local startPosY = 0.4
+local spacing = 0.08
+-- Button-Texte
+local buttonTexts = {"Fly Toggle", "Inject", "Confirm"}
+-- Tabelle für Zugriff auf Buttons (optional)
+local buttons = {}
+for i, text in ipairs(buttonTexts) do
+	local button = Instance.new("TextButton")
+	button.Size = buttonSize
+	button.Position = UDim2.new(0.05, 0, startPosY + (i - 1) * spacing, 0)
+	button.Text = text
+	button.Name = text
+	button.BackgroundColor3 = Color3.fromRGB(0, 150, 255)
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.Font = Enum.Font.SourceSansBold
+	button.TextSize = 22
+	button.Parent = screenGui
+	-- Direkt die Klickfunktion
+	button.MouseButton1Click:Connect(function()
+		if text == "Fly Toggle" then
+			fly()
+		elseif text == "Inject" then
+			GPressed()
+		else
+			confirm()
+		end
+	end)
+	buttons[text] = button
+end
