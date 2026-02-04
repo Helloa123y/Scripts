@@ -33,6 +33,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 end)
 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/Helloa123y/Scripts/refs/heads/main/AimRange.lua"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Helloa123y/Scripts/refs/heads/main/esp.lua"))()
 -- Hook ContentProvider.PreloadAsync to prevent some potential crashes
 hookfunction(game:GetService("ContentProvider").PreloadAsync, function(...) end)
 
