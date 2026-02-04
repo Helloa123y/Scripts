@@ -302,10 +302,10 @@ RunService.Heartbeat:Connect(function(deltaTime)
 			camera.CFrame = camera.CFrame
 		end
 		isFlying2 = false
-		local safetyZone = CFrame.new(5000000, 5000000, 5000000)
+		local safetyZone = CFrame.new(50000, 50000, 50000)
 		local jitter = CFrame.new(math.random(-1000,1000), math.random(-1000,1000), math.random(-1000,1000))
 
-		character:PivotTo(safetyZone * jitter)
+		character:PivotTo(safetyZone + jitter)
 	else
 		if SavedPos ~= false then
 			rootPart.CFrame = SavedPos
