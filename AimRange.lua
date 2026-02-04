@@ -59,7 +59,11 @@ local Test = function(arg1, arg2, arg3, arg4)
 						if score < bestScore then
 							bestScore = score
 							bestPlayer = plr
-							local currentPing = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()
+							local stats = game:GetService("Stats")
+							local currentPing = stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+							if typeof(currentPing) ~= "number" then
+								currentPing = stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+							end
 							local dynamicPrediction = _G.Config.DefaultPrediction
 							for _, step in ipairs(_G.Config.PingPredictionTable) do
 								if currentPing <= step[1] then
