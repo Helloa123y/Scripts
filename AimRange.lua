@@ -1,85 +1,151 @@
 _G.Withelist =  if _G.Withelist then _G.Withelist else {}
 
+
+
+_G.FOVCircle = Drawing.new("Circle")
+_G.FOVCircle.Thickness = 2
+_G.FOVCircle.Color = Color3.fromRGB(255, 255, 255)
+_G.FOVCircle.Filled = false
+_G.FOVCircle.Transparency = 0.5
+_G.FOVCircle.Radius = _G.Config.FOVRadius -- Das ist die Größe deines "Aimbot-Fensters"
+_G.FOVCircle.Visible = true
+
+_G.FOVCircle.Position = Vector2.new(workspace.CurrentCamera.ViewportSize.X / 2, workspace.CurrentCamera.ViewportSize.Y / 2)
+
+
 local Test = function(arg1, arg2, arg3, arg4)
-	local function getTargetDirection()
-        local LocalPlayer = game.Players.LocalPlayer
-        local Character = LocalPlayer.Character
-        if not Character then 
-        	return arg2 -- Fallback, falls kein Charakter
-        end
-        
-        local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-        if not HumanoidRootPart then 
-        	return arg2 -- Fallback, falls kein HRP
-        end
-        
-        local origin = Character.HumanoidRootPart.Position
-        local lookVector = workspace.CurrentCamera.CFrame.LookVector
-        
-        local MAX_DISTANCE = 200
-        local MAX_ANGLE = 45
-        local FADE_DURATION = 0.15
-        
-        local bestPart = nil
-        local bestScore = 0.6
-        for _, part in ipairs(game.Players:GetPlayers()) do
-            local plr = part
-            if not part.Character or not part.Character:FindFirstChild("HumanoidRootPart") then continue end
-            	local part = part.Character.HumanoidRootPart
-        	local directionToPart = (part.Position - origin)
-        	local distance = directionToPart.Magnitude
-        	if distance > MAX_DISTANCE then continue end
-        	local angle = math.deg(math.acos(lookVector:Dot(directionToPart.Unit)))
-        	if angle > MAX_ANGLE then continue end
-        	local normalizedDistance = distance / MAX_DISTANCE
-        	local normalizedAngle = angle / MAX_ANGLE
-        	local score = (normalizedDistance * 0.6) + (normalizedAngle * 0.4) 
-            
-        	if score < bestScore and not part.Parent.Humanoid:GetAttribute("IsDead") and not table.find(_G.Withelist, plr.Name) then
-        		bestScore = score
-        		bestPart = plr
-        	end
-        end
-        
-        -- Wenn ein Ziel gefunden wurde, ziele auf dessen Kopf
-        if bestPart then
-        	local targetHead = bestPart.Character:FindFirstChild("Head")
-        	if targetHead then
-        		local cameraPos = workspace.CurrentCamera.CFrame.Position
-        		local distanceToTarget = (targetHead.Position - cameraPos).Magnitude
-        		local direction = (targetHead.Position - cameraPos).Unit
-        		local Pos = cameraPos + direction * (distanceToTarget - 6)
-        		print((Pos - targetHead.Position).Magnitude)
-        		local Head = bestPart.Character.Head
-        		return  direction * 500 , Pos , Head
-        	end
-        end
-        
-        return arg2 -- Fallback auf ursprüngliche Richtung
-    end
+	local Camera = workspace.CurrentCamera
+	local LocalPlayer = game.Players.LocalPlayer
 
+	-- :: HILFSFUNKTION: Das beste Ziel finden :: --
+	local function getBestTarget()
+		local bestPlayer = nil
+		local bestScore = math.huge
+		local finalPredictedPos = nil
 
-	local direction , Pos , Head = getTargetDirection()
-	local var49 = {}
-	table.insert(var49 , game.Players.LocalPlayer.Character)
-	local RaycastParams_new_result1_2 = RaycastParams.new()
-	RaycastParams_new_result1_2.FilterType = Enum.RaycastFilterType.Exclude
-	RaycastParams_new_result1_2.FilterDescendantsInstances = var49
+		local mousePos = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
-	repeat
-		local any_Raycast_result1 = game.Workspace:Raycast(if Pos then Pos else arg1, direction, RaycastParams_new_result1_2)
-		if any_Raycast_result1 then
-			table.insert(var49, any_Raycast_result1.Instance)
-			RaycastParams_new_result1_2.FilterDescendantsInstances = var49
-			if not arg4(any_Raycast_result1) then return end
-			if Head and not table.find(var49 , Head) then
-				table.insert(var49,Head)
+		for _, plr in ipairs(game.Players:GetPlayers()) do
+			if plr == LocalPlayer or table.find(_G.Withelist or {}, plr.Name) then continue end
+
+			local char = plr.Character
+			local head = char and char:FindFirstChild("Head")
+			local hum = char and char:FindFirstChild("Humanoid")
+			local root = char and char:FindFirstChild("HumanoidRootPart")
+
+			if head and hum and root and hum.Health > 0 then
+
+				-- 1. Distanz Check (Welt)
+				local distToPlayer = (root.Position - Camera.CFrame.Position).Magnitude
+				if distToPlayer > _G.Config.MaxDistance then continue end
+
+				-- 2. FOV Check (Bildschirm)
+				local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+				if onScreen then
+					local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+
+					if distToMouse <= _G.Config.FOVRadius then
+
+						-- :: DAS SCORING SYSTEM :: --
+						-- Wir kombinieren Maus-Nähe und Distanz zum Gegner.
+						-- Score = (MausAbstand) + (WeltAbstand * Gewichtung)
+						local score = distToMouse + (distToPlayer * _G.Config.DistanceWeight)
+
+						-- HP Logik: Leichte Strafe für Low HP, aber kein Ausschluss!
+						if _G.Config.AvoidLowHP and hum.Health < _G.Config.LowHPThreshold then
+							score = score + _G.Config.LowHPPenalty
+						end
+
+						if score < bestScore then
+							bestScore = score
+							bestPlayer = plr
+							local currentPing = game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue()
+							local dynamicPrediction = _G.Config.DefaultPrediction
+							for _, step in ipairs(_G.Config.PingPredictionTable) do
+								if currentPing <= step[1] then
+									dynamicPrediction = step[2]
+									break
+								end
+							end
+							finalPredictedPos = head.Position + (root.Velocity * dynamicPrediction)
+						end
+					end
+				end
 			end
 		end
-	until not any_Raycast_result1
-	table.remove(var49 , table.find(var49 , game.Players.LocalPlayer.Character))
-	return var49
+
+		return bestPlayer, finalPredictedPos
+	end
+
+	-- 1. Ziel suchen
+	local targetPlayer, predictedPos = getBestTarget()
+
+	-- 2. Wenn Ziel gefunden -> Silent Aim (Spoofing)
+	if targetPlayer and predictedPos then
+		local targetHead = targetPlayer.Character.Head
+		local camPos = Camera.CFrame.Position
+
+		-- Startpunkt leicht versetzt für Wallcheck-Bypass
+		local directionToPred = (predictedPos - camPos).Unit
+		local distToPred = (predictedPos - camPos).Magnitude
+		-- :: VISUAL BEAM :: --
+		task.spawn(function()
+			local beam = Instance.new("Part")
+			beam.Parent = workspace
+			beam.Anchored = true
+			beam.CanCollide = false
+			beam.CanQuery = false
+			beam.Material = Enum.Material.Neon
+			beam.Color = Color3.fromRGB(255, 0, 0) -- Rot für Aggressiv
+			beam.Transparency = 0.4
+			beam.Size = Vector3.new(0.05, 0.05, distToPred) -- Dünner Beam
+			beam.CFrame = CFrame.lookAt(camPos, predictedPos) * CFrame.new(0, 0, -distToPred/2)
+
+			game:GetService("Debris"):AddItem(beam, 1.5) -- Automatisches Löschen
+		end)
+
+		-- Fake Result erstellen
+		local fakeResult = {
+			Instance = targetHead,
+			Position = predictedPos, -- Wir treffen dort, wo er sein wird!
+			Normal = -directionToPred, -- Realistische Einschlagrichtung
+			Material = targetHead.Material,
+			Distance = distToPred
+		}
+
+		-- Dem Spiel den Treffer melden
+		arg4(fakeResult)
+
+		-- Rückgabe an das Waffensystem
+		return {targetHead}
+	end
+
+	-- 3. Fallback: Normaler Raycast (wenn kein Ziel im FOV)
+	-- Hier nutzen wir den ursprünglichen Raycast des Spiels, damit man normal schießen kann
+	local ignoreList = {LocalPlayer.Character}
+	local rayParams = RaycastParams.new()
+	rayParams.FilterType = Enum.RaycastFilterType.Exclude
+	rayParams.FilterDescendantsInstances = ignoreList
+
+	-- Die Richtung aus den Argumenten nutzen (wohin du wirklich zielst)
+	local originalDirection = arg2 
+	-- Falls arg2 keine Direction ist, müssen wir raten. Meist ist arg2 direction.
+	-- Wenn arg2 nil ist, nutzen wir Kamera Blickrichtung
+	if typeof(originalDirection) ~= "Vector3" then 
+		originalDirection = Camera.CFrame.LookVector * 2000 
+	end
+
+	local result = workspace:Raycast(arg1, originalDirection, rayParams)
+
+	-- Wenn der normale Raycast etwas trifft, geben wir das zurück
+	if result then
+		if not arg4(result) then return {} end -- Original Logik beibehalten
+		return {result.Instance}
+	end
+
+	return {}
 end
+
 local old = require(game.ReplicatedStorage.Modules.Core.Util).all_parts_on_ray
 print("Yes")
 hookfunction(old, Test)
@@ -88,39 +154,35 @@ hookfunction(old, Test)
 local OldFunction = require(game.ReplicatedStorage.Modules.Game.ItemTypes.Melee).get_hit_players
 
 local cool = function()
-    local LocalPlayer = game.Players.LocalPlayer
-    local Range = 50
-    local Table = {}
-    local Character = LocalPlayer.Character
-    if not Character then return Table end
+	local LocalPlayer = game.Players.LocalPlayer
+	local Range = 50
+	local Table = {}
+	local Character = LocalPlayer.Character
+	if not Character then return Table end
 
-    local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
-    if not HumanoidRootPart then return Table end
+	local HumanoidRootPart = Character:FindFirstChild("HumanoidRootPart")
+	if not HumanoidRootPart then return Table end
 
-    local Position = HumanoidRootPart.Position
+	local Position = HumanoidRootPart.Position
 
-    for _, player in game.Players:GetPlayers() do
-       if player ~= LocalPlayer and not table.find(_G.Withelist, player.Name) then
-            local targetChar = player.Character
-            if targetChar then
-                local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
-                local targetHum = targetChar:FindFirstChildWhichIsA("Humanoid")
-                
-                if targetHRP and targetHum and not targetHum:GetAttribute("IsDead") then
-                    local distance = (targetHRP.Position - Position).Magnitude
-                    if distance <= Range then
-                        local directionToTarget = (targetHRP.Position - Position).Unit
-                        local lookDot = HumanoidRootPart.CFrame.LookVector:Dot(directionToTarget)
-                        if math.acos(lookDot) <= 1.2 then -- ~68.7° FOV
-                            table.insert(Table, player)
-                        end
-                    end
-                end
-            end
-        end
-    end
+	for _, player in game.Players:GetPlayers() do
+		if player ~= LocalPlayer and not table.find(_G.Withelist, player.Name) then
+			local targetChar = player.Character
+			if targetChar then
+				local targetHRP = targetChar:FindFirstChild("HumanoidRootPart")
+				local targetHum = targetChar:FindFirstChildWhichIsA("Humanoid")
 
-    return Table
+				if targetHRP and targetHum and not targetHum:GetAttribute("IsDead") then
+					local distance = (targetHRP.Position - Position).Magnitude
+					if distance <= Range then
+						table.insert(Table, player)
+					end
+				end
+			end
+		end
+	end
+
+	return Table
 end
 print("YES")
 hookfunction(OldFunction, cool)  -- ayri
