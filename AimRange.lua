@@ -62,18 +62,22 @@ local Test = function(arg1, arg2, arg3, arg4)
 						if _G.Config.AvoidLowHP and hum.Health < _G.Config.LowHPThreshold then
 							score = score + _G.Config.LowHPPenalty
 						end
-
+					
 						if score < bestScore then
 							bestScore = score
 							bestPlayer = plr
-				
 							local dynamicPrediction = _G.Config.DefaultPrediction
-							for _, step in ipairs(_G.Config.PingPredictionTable) do
-								if _G.currentPing <= step[1] then
-									dynamicPrediction = step[2]
-									break
+							if _G.Config.UsePrediction then
+								for _, step in ipairs(_G.Config.PingPredictionTable) do
+									if _G.currentPing <= step[1] then
+										dynamicPrediction = step[2]
+										break
+									end
 								end
+							else
+								dynamicPrediction = 0
 							end
+						
 							finalPredictedPos = head.Position + (root.Velocity * dynamicPrediction)
 						end
 					end
