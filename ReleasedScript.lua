@@ -303,9 +303,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 		camera.CameraType = Enum.CameraType.Scriptable
 		camera.CFrame = camera.CFrame
 		character:MoveTo(safetyZone.Position)
-		character.HumanoidRootPart.Anchored = true
 	else
-		character.HumanoidRootPart.Anchored = false
 		if SavedPos ~= false then
 			rootPart.CFrame = SavedPos
 			camera.CameraType = Enum.CameraType.Custom
