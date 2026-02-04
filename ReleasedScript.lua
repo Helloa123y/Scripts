@@ -300,8 +300,8 @@ RunService.Heartbeat:Connect(function(deltaTime)
 		end
 		isFlying2 = false
 		local safetyZone = CFrame.new(87.5, 253.3, 544.36)
-		camera.CameraType = Enum.CameraType.Scriptable
-		camera.CFrame = camera.CFrame
+		--camera.CameraType = Enum.CameraType.Scriptable
+		--camera.CFrame = camera.CFrame
 		character:MoveTo(safetyZone.Position)
 	else
 		if SavedPos ~= false then
