@@ -178,7 +178,6 @@ local Test = function(arg1, arg2, arg3, arg4)
 	local LocalPlayer = game.Players.LocalPlayer
 
 	-- :: HILFSFUNKTION: Das beste Ziel finden :: --
-	-- :: HILFSFUNKTION: Das beste Ziel finden (INNERHALB DER HOOK FUNKTION) :: --
 	local function getBestTarget()
 		local bestPlayer = nil
 		local bestScore = math.huge
@@ -187,62 +186,60 @@ local Test = function(arg1, arg2, arg3, arg4)
 		local mousePos = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
 		for _, plr in ipairs(game.Players:GetPlayers()) do
-			-- Whitelist Check
 			if plr == LocalPlayer or table.find(_G.Withelist or {}, plr.Name) then continue end
-
-			-- Lock-Check: Wenn wir jemanden verfolgen, ignorieren wir alle anderen
-			if _G.targetPlayer and plr ~= _G.targetPlayer then continue end
-
+			if _G.targetPlayer then
+				if plr.Name ~= _G.targetPlayer.Name then continue end
+			end
 			local char = plr.Character
 			local head = char and char:FindFirstChild("Head")
 			local hum = char and char:FindFirstChild("Humanoid")
 			local root = char and char:FindFirstChild("HumanoidRootPart")
 
 			if head and hum and root and hum.Health > 0 then
-				-- 1. Distanz Check
+
+				-- 1. Distanz Check (Welt)
 				local distToPlayer = (root.Position - Camera.CFrame.Position).Magnitude
 				if distToPlayer > _G.Config.MaxDistance then continue end
 
-				-- 2. FOV / Visibility Check
+				-- 2. FOV Check (Bildschirm)
 				local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-
-				-- Wenn wir im Follow-Mode sind (_G.targetPlayer gesetzt), 
-				-- brauchen wir keinen FOV Check mehr, wir treffen ihn sowieso.
 				if onScreen or _G.targetPlayer then
 					local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
 
 					if distToMouse <= _G.Config.FOVRadius or _G.targetPlayer then
+
+						-- :: DAS SCORING SYSTEM :: --
+						-- Wir kombinieren Maus-Nähe und Distanz zum Gegner.
+						-- Score = (MausAbstand) + (WeltAbstand * Gewichtung)
 						local score = distToMouse + (distToPlayer * _G.Config.DistanceWeight)
 
+						-- HP Logik: Leichte Strafe für Low HP, aber kein Ausschluss!
+						if _G.Config.AvoidLowHP and hum.Health < _G.Config.LowHPThreshold then
+							score = score + _G.Config.LowHPPenalty
+						end
+					
 						if score < bestScore then
 							bestScore = score
 							bestPlayer = plr
-
-							-- LATENCY & PREDICTION LOGIK
-							-- Wir nutzen nur _G Variablen, da diese im Hook verfügbar sind
-							local pValue = _G.Config.DefaultPrediction or 0.12
-
-							-- Wenn _G.targetPlayer existiert, sind wir im Follow-Mode
-							-- Wir addieren massiv Prediction, um "nach vorne" zu schießen
-							if _G.targetPlayer then
-								pValue = pValue + 0.15 -- Der "Latency-Vorstoß"
-							elseif _G.Config.UsePrediction then
-								-- Ping-Tabelle checken (muss auch in _G stehen!)
-								for _, step in ipairs(_G.Config.PingPredictionTable or {}) do
+							local dynamicPrediction = _G.Config.DefaultPrediction
+							if _G.Config.UsePrediction then
+								for _, step in ipairs(_G.Config.PingPredictionTable) do
 									if _G.currentPing <= step[1] then
-										pValue = step[2]
+										dynamicPrediction = step[2]
 										break
 									end
 								end
+							else
+								dynamicPrediction = 0
 							end
-
-							-- Der Schuss wird VOR den Spieler gesetzt (Kompensation der Verfolgung)
-							finalPredictedPos = head.Position + (root.Velocity * pValue)
+						
+							finalPredictedPos = head.Position + (root.Velocity * dynamicPrediction)
 						end
 					end
 				end
 			end
 		end
+
 		return bestPlayer, finalPredictedPos
 	end
 
@@ -297,7 +294,9 @@ local Test = function(arg1, arg2, arg3, arg4)
 		local upperTorso = targetPlayer.Character:FindFirstChild("UpperTorso")
 		return {targetHead, upperTorso or targetHead}
 	end
-	
+
+	-- 3. Fallback: Normaler Raycast (wenn kein Ziel im FOV)
+	-- Hier nutzen wir den ursprünglichen Raycast des Spiels, damit man normal schießen kann
 	local ignoreList = {LocalPlayer.Character}
 	local rayParams = RaycastParams.new()
 	rayParams.FilterType = Enum.RaycastFilterType.Exclude
@@ -361,4 +360,4 @@ local cool = function()
 	return Table
 end
 print("YES")
-hookfunction(OldFunction, cool)  -- ayri
+hookfunction(OldFunction, cool)  -- ayrifinalk
