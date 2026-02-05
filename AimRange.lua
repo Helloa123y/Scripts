@@ -27,40 +27,28 @@ local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local LocalPlayer = game.Players.LocalPlayer
 local Camera = workspace.CurrentCamera
--- Flag für den Rechtsklick-Status
-local isRightClicking = false
-local preTeleportCFrame = nil -- Hier speichern wir den Rücksprung-Punkt
 
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
 
-	if input.UserInputType == Enum.UserInputType.MouseButton2 then -- Rechtsklick gedrückt
-		local char = game.Players.LocalPlayer.Character
-		local root = char and char:FindFirstChild("HumanoidRootPart")
+-- Status-Variablen
+local followActive = false
+local lockedTarget = nil
+local preTeleportCFrame = nil
 
-		if root then
-			-- 1. POSITION MERKEN (Bevor der Teleport startet)
-			preTeleportCFrame = root.CFrame
-			isRightClicking = true
-		end
+-- Funktion zum Beenden des Follows
+local function disableFollow()
+	followActive = false
+	lockedTarget = nil
+	local char = game.Players.LocalPlayer.Character
+	local root = char and char:FindFirstChild("HumanoidRootPart")
+
+	if root and preTeleportCFrame then
+		root.CFrame = preTeleportCFrame
+		root.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 	end
-end)
-
-UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton2 then -- Rechtsklick losgelassen
-		isRightClicking = false
-
-		local char = game.Players.LocalPlayer.Character
-		local root = char and char:FindFirstChild("HumanoidRootPart")
-
-		-- 2. RÜCKSPRUNG ZUR ALTEN POSITION
-		if root and preTeleportCFrame then
-			root.CFrame = preTeleportCFrame
-			root.AssemblyLinearVelocity = Vector3.new(0, 0, 0) -- Stoppt Bewegung
-			preTeleportCFrame = nil
-		end
-	end
-end)
+	preTeleportCFrame = nil
+end
 
 
 local function getBestTarget()
@@ -126,22 +114,59 @@ local function getBestTarget()
 	return bestPlayer, finalPredictedPos
 end
 
--- Der Loop, der dich beim Gegner hält
-RunService.Heartbeat:Connect(function()
-	if isRightClicking then
-		-- Nutzt deine getBestTarget Funktion aus dem restlichen Script
-		local targetPlayer, predictedPos = getBestTarget()
 
-		if targetPlayer and targetPlayer.Character then
-			local targetHead = targetPlayer.Character:FindFirstChild("Head")
-			local myChar = game.Players.LocalPlayer.Character
-			local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
 
-			if targetHead and myRoot then
-				-- Teleport zum Gegner (3 Studs dahinter für Treffer-Garantie)
-				myRoot.CFrame = targetHead.CFrame * CFrame.new(0, 0, 3)
-				myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+	if input.KeyCode == Enum.KeyCode.M then
+		local char = game.Players.LocalPlayer.Character
+		local hum = char and char:FindFirstChild("Humanoid")
+		local root = char and char:FindFirstChild("HumanoidRootPart")
+
+		-- Toggle OFF
+		if followActive then
+			disableFollow()
+		else
+			-- Toggle ON (Nur wenn Health > 30)
+			if hum and hum.Health > 30 and root then
+				-- Target suchen (deine getBestTarget Funktion)
+				local targetPlayer, _ = getBestTarget()
+
+				if targetPlayer then
+					lockedTarget = targetPlayer
+					preTeleportCFrame = root.CFrame
+					followActive = true
+				end
 			end
+		end
+	end
+end)
+
+-- Haupt-Loop
+RunService.Heartbeat:Connect(function()
+	local myChar = game.Players.LocalPlayer.Character
+	local myHum = myChar and myChar:FindFirstChild("Humanoid")
+	local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+
+	-- 1. Abbruch-Bedingungen prüfen
+	if followActive then
+		-- Wenn ich selbst low HP bin oder sterbe
+		if not myHum or myHum.Health <= 30 then
+			disableFollow()
+			return
+		end
+
+		-- Wenn das Target weg ist (Leaved, Character gelöscht, Tot)
+		if not lockedTarget or not lockedTarget.Parent or not lockedTarget.Character or not lockedTarget.Character:FindFirstChild("Humanoid") or lockedTarget.Character.Humanoid.Health <= 0 then
+			disableFollow()
+			return
+		end
+
+		-- 2. Teleport ausführen (Target-Lock)
+		local targetRoot = lockedTarget.Character:FindFirstChild("HumanoidRootPart")
+		if targetRoot and myRoot then
+			myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3)
+			myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 		end
 	end
 end)
