@@ -40,6 +40,7 @@ local preTeleportCFrame = nil
 local function disableFollow()
 	followActive = false
 	lockedTarget = nil
+	_G.targetPlayer = nil
 	local char = game.Players.LocalPlayer.Character
 	local root = char and char:FindFirstChild("HumanoidRootPart")
 
@@ -131,7 +132,7 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 			if hum and hum.Health > 30 and root then
 				-- Target suchen (deine getBestTarget Funktion)
 				local targetPlayer, _ = getBestTarget()
-
+				_G.targetPlayer = targetPlayer
 				if targetPlayer then
 					lockedTarget = targetPlayer
 					preTeleportCFrame = root.CFrame
@@ -186,7 +187,9 @@ local Test = function(arg1, arg2, arg3, arg4)
 
 		for _, plr in ipairs(game.Players:GetPlayers()) do
 			if plr == LocalPlayer or table.find(_G.Withelist or {}, plr.Name) then continue end
-
+			if _G.targetPlayer then
+				if plr.Name ~= _G.targetPlayer.Name then continue end
+			end
 			local char = plr.Character
 			local head = char and char:FindFirstChild("Head")
 			local hum = char and char:FindFirstChild("Humanoid")
@@ -203,7 +206,7 @@ local Test = function(arg1, arg2, arg3, arg4)
 				if onScreen then
 					local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
 
-					if distToMouse <= _G.Config.FOVRadius then
+					if distToMouse <= _G.Config.FOVRadius or _G.targetPlayer then
 
 						-- :: DAS SCORING SYSTEM :: --
 						-- Wir kombinieren Maus-Nähe und Distanz zum Gegner.
