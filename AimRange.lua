@@ -166,7 +166,7 @@ RunService.Heartbeat:Connect(function()
 		-- 2. Teleport ausführen (Target-Lock)
 		local targetRoot = lockedTarget.Character:FindFirstChild("HumanoidRootPart")
 		if targetRoot and myRoot then
-			myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3)
+			myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -4)
 			myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 		end
 	end
