@@ -166,7 +166,7 @@ RunService.Heartbeat:Connect(function()
 		-- 2. Teleport ausführen (Target-Lock)
 		local targetRoot = lockedTarget.Character:FindFirstChild("HumanoidRootPart")
 		if targetRoot and myRoot then
-			myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, -4)
+			myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3)
 			myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 		end
 	end
@@ -218,22 +218,38 @@ local Test = function(arg1, arg2, arg3, arg4)
 							score = score + _G.Config.LowHPPenalty
 						end
 					
+						-- Innerhalb der getBestTarget Funktion (im Test Hook)
 						if score < bestScore then
 							bestScore = score
 							bestPlayer = plr
+
 							local dynamicPrediction = _G.Config.DefaultPrediction
-							if _G.Config.UsePrediction then
+
+							-- FALL 1: Wir sind im Follow-Modus (M-Taste aktiv)
+							if _G.targetPlayer and plr == _G.targetPlayer then
+								-- Wir erhöhen die Prediction drastisch, um die Server-Latenz auszugleichen.
+								-- Da wir hinter ihm kleben, schießen wir weit "vor" ihn.
+								-- Ein Wert zwischen 0.15 und 0.25 ist meistens der Sweetspot.
+								dynamicPrediction = _G.Config.DefaultPrediction + 0.3
+
+								-- FALL 2: Normaler Silent Aim (ohne Follow)
+							elseif _G.Config.UsePrediction then
 								for _, step in ipairs(_G.Config.PingPredictionTable) do
 									if _G.currentPing <= step[1] then
 										dynamicPrediction = step[2]
 										break
 									end
 								end
-							else
-								dynamicPrediction = 0
 							end
-						
+
+							-- Die finale Position berechnen (Wir schießen dorthin, wo er GLEICH sein wird)
 							finalPredictedPos = head.Position + (root.Velocity * dynamicPrediction)
+
+							-- KLEINER TRICK: Wenn er springt, schießen wir ein Stück tiefer, 
+							-- da Server-Updates bei Sprüngen oft laggen.
+							if root.Velocity.Y > 5 then
+								finalPredictedPos = finalPredictedPos - Vector3.new(0, 0.5, 0)
+							end
 						end
 					end
 				end
@@ -247,42 +263,43 @@ local Test = function(arg1, arg2, arg3, arg4)
 	local targetPlayer, predictedPos = getBestTarget()
 
 	-- 2. Wenn Ziel gefunden -> Silent Aim (Spoofing)
+	-- 2. Wenn Ziel gefunden -> Silent Aim (Spoofing)
 	if targetPlayer and predictedPos then
-		local targetHead = targetPlayer.Character.Head
-		local player = game.Players.LocalPlayer
-		local char = player.Character
-		local rootPart = char.HumanoidRootPart
-		local camPos = Camera.CFrame.Position
+		local targetHead = targetPlayer.Character:FindFirstChild("Head")
+		if not targetHead then return {} end
 
-		local originalCFrame = rootPart.Position
+		-- Wir nehmen die Position des Ziels als Trefferpunkt
+		local hitPos = predictedPos
 
-		local directionToPred = (predictedPos - rootPart.Position).Unit
-		local distToPred = (predictedPos - rootPart.Position).Magnitude
-
-		-- :: VISUAL BEAM (Vom neuen Standpunkt aus) :: --
+		-- :: VISUAL BEAM :: --
 		task.spawn(function()
 			local beam = Instance.new("Part")
 			beam.Parent = workspace
 			beam.Anchored = true
 			beam.CanCollide = false
 			beam.Material = Enum.Material.Neon
-			beam.Color = Color3.fromRGB(255, 255, 0) -- Gelb für "Bypassed"
+			beam.Color = Color3.fromRGB(255, 0, 0)
 			beam.Transparency = 0.5
-			beam.Size = Vector3.new(0.1, 0.1, distToPred)
-			beam.CFrame = CFrame.lookAt(originalCFrame, predictedPos) * CFrame.new(0, 0, -distToPred/2)
-			game:GetService("Debris"):AddItem(beam, 0.5)
+			beam.Size = Vector3.new(0.05, 0.05, (arg1 - hitPos).Magnitude)
+			beam.CFrame = CFrame.lookAt(arg1, hitPos) * CFrame.new(0, 0, -beam.Size.Z/2)
+			game:GetService("Debris"):AddItem(beam, 0.1) -- Ganz kurz für Performance
 		end)
 
-		-- 3. FAKE RESULT (Der Server sieht den Treffer auf 0 Distanz)
+		-- 3. FAKE RESULT (Perfekt abgestimmt)
 		local fakeResult = {
 			Instance = targetHead,
-			Position = predictedPos,
+			Position = hitPos,
 			Normal = Vector3.new(0, 1, 0),
-			Material = targetHead.Material,
-			Distance = 0.1 -- Extrem nah für maximale Hit-Garantie
+			Material = Enum.Material.Plastic,
+			Distance = (arg1 - hitPos).Magnitude -- WICHTIG: Realistische Distanz zum Startpunkt
 		}
 
-		-- Dem Spiel den Treffer melden
+		-- Wenn wir im Follow-Modus sind, muss die Distanz fast 0 sein
+		if followActive and lockedTarget == targetPlayer then
+			fakeResult.Distance = 0.1
+		end
+
+		-- Den Treffer direkt in die Engine füttern
 		arg4(fakeResult)
 
 		return {targetHead}
