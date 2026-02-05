@@ -218,38 +218,22 @@ local Test = function(arg1, arg2, arg3, arg4)
 							score = score + _G.Config.LowHPPenalty
 						end
 					
-						-- Innerhalb der getBestTarget Funktion (im Test Hook)
 						if score < bestScore then
 							bestScore = score
 							bestPlayer = plr
-
 							local dynamicPrediction = _G.Config.DefaultPrediction
-
-							-- FALL 1: Wir sind im Follow-Modus (M-Taste aktiv)
-							if _G.targetPlayer and plr == _G.targetPlayer then
-								-- Wir erhöhen die Prediction drastisch, um die Server-Latenz auszugleichen.
-								-- Da wir hinter ihm kleben, schießen wir weit "vor" ihn.
-								-- Ein Wert zwischen 0.15 und 0.25 ist meistens der Sweetspot.
-								dynamicPrediction = _G.Config.DefaultPrediction + 0.3
-
-								-- FALL 2: Normaler Silent Aim (ohne Follow)
-							elseif _G.Config.UsePrediction then
+							if _G.Config.UsePrediction then
 								for _, step in ipairs(_G.Config.PingPredictionTable) do
 									if _G.currentPing <= step[1] then
 										dynamicPrediction = step[2]
 										break
 									end
 								end
+							else
+								dynamicPrediction = 0
 							end
-
-							-- Die finale Position berechnen (Wir schießen dorthin, wo er GLEICH sein wird)
+						
 							finalPredictedPos = head.Position + (root.Velocity * dynamicPrediction)
-
-							-- KLEINER TRICK: Wenn er springt, schießen wir ein Stück tiefer, 
-							-- da Server-Updates bei Sprüngen oft laggen.
-							if root.Velocity.Y > 5 then
-								finalPredictedPos = finalPredictedPos - Vector3.new(0, 0.5, 0)
-							end
 						end
 					end
 				end
@@ -302,7 +286,8 @@ local Test = function(arg1, arg2, arg3, arg4)
 		-- Den Treffer direkt in die Engine füttern
 		arg4(fakeResult)
 
-		return {targetHead}
+		-- Das Waffensystem braucht oft mehr als nur das Head-Teil
+		return {targetHead, targetPlayer.Character:FindFirstChild("UpperTorso") or targetHead}
 	end
 
 	-- 3. Fallback: Normaler Raycast (wenn kein Ziel im FOV)
