@@ -95,11 +95,12 @@ local Test = function(arg1, arg2, arg3, arg4)
 	if targetPlayer and predictedPos then
 		local targetHead = targetPlayer.Character.Head
 		local player = game.Players.LocalPlayer
-		local rootPart = player.Character
+		local char = player.Character
+		local rootPart = char.HumanoidRootPart
 		local camPos = Camera.CFrame.Position
 
 		local originalCFrame = rootPart.Position
-		rootPart:MoveTo(targetHead.Position )
+		char:MoveTo(targetHead.Position )
 		-- task.wait() -- Nur nutzen, wenn der Server sonst "Wall-Hit" sagt
 
 		local directionToPred = (predictedPos - rootPart.Position).Unit
@@ -132,7 +133,7 @@ local Test = function(arg1, arg2, arg3, arg4)
 		arg4(fakeResult)
 
 		-- 4. SOFORTIGER RÜCKSPRUNG
-		rootPart:MoveTo(originalCFrame)
+		char:MoveTo(originalCFrame)
 
 		return {targetHead}
 	end
