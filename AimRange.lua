@@ -178,6 +178,7 @@ local Test = function(arg1, arg2, arg3, arg4)
 	local LocalPlayer = game.Players.LocalPlayer
 
 	-- :: HILFSFUNKTION: Das beste Ziel finden :: --
+	-- :: HILFSFUNKTION: Das beste Ziel finden (INNERHALB DER HOOK FUNKTION) :: --
 	local function getBestTarget()
 		local bestPlayer = nil
 		local bestScore = math.huge
@@ -186,67 +187,68 @@ local Test = function(arg1, arg2, arg3, arg4)
 		local mousePos = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
 
 		for _, plr in ipairs(game.Players:GetPlayers()) do
+			-- Whitelist Check
 			if plr == LocalPlayer or table.find(_G.Withelist or {}, plr.Name) then continue end
-			if _G.targetPlayer then
-				if plr.Name ~= _G.targetPlayer.Name then continue end
-			end
+
+			-- Lock-Check: Wenn wir jemanden verfolgen, ignorieren wir alle anderen
+			if _G.targetPlayer and plr ~= _G.targetPlayer then continue end
+
 			local char = plr.Character
 			local head = char and char:FindFirstChild("Head")
 			local hum = char and char:FindFirstChild("Humanoid")
 			local root = char and char:FindFirstChild("HumanoidRootPart")
 
 			if head and hum and root and hum.Health > 0 then
-
-				-- 1. Distanz Check (Welt)
+				-- 1. Distanz Check
 				local distToPlayer = (root.Position - Camera.CFrame.Position).Magnitude
 				if distToPlayer > _G.Config.MaxDistance then continue end
 
-				-- 2. FOV Check (Bildschirm)
+				-- 2. FOV / Visibility Check
 				local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+
+				-- Wenn wir im Follow-Mode sind (_G.targetPlayer gesetzt), 
+				-- brauchen wir keinen FOV Check mehr, wir treffen ihn sowieso.
 				if onScreen or _G.targetPlayer then
 					local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
 
 					if distToMouse <= _G.Config.FOVRadius or _G.targetPlayer then
-
-						-- :: DAS SCORING SYSTEM :: --
-						-- Wir kombinieren Maus-Nähe und Distanz zum Gegner.
-						-- Score = (MausAbstand) + (WeltAbstand * Gewichtung)
 						local score = distToMouse + (distToPlayer * _G.Config.DistanceWeight)
 
-						-- HP Logik: Leichte Strafe für Low HP, aber kein Ausschluss!
-						if _G.Config.AvoidLowHP and hum.Health < _G.Config.LowHPThreshold then
-							score = score + _G.Config.LowHPPenalty
-						end
-					
 						if score < bestScore then
 							bestScore = score
 							bestPlayer = plr
-							local dynamicPrediction = _G.Config.DefaultPrediction
-							if _G.Config.UsePrediction then
-								for _, step in ipairs(_G.Config.PingPredictionTable) do
+
+							-- LATENCY & PREDICTION LOGIK
+							-- Wir nutzen nur _G Variablen, da diese im Hook verfügbar sind
+							local pValue = _G.Config.DefaultPrediction or 0.12
+
+							-- Wenn _G.targetPlayer existiert, sind wir im Follow-Mode
+							-- Wir addieren massiv Prediction, um "nach vorne" zu schießen
+							if _G.targetPlayer then
+								pValue = pValue + 0.15 -- Der "Latency-Vorstoß"
+							elseif _G.Config.UsePrediction then
+								-- Ping-Tabelle checken (muss auch in _G stehen!)
+								for _, step in ipairs(_G.Config.PingPredictionTable or {}) do
 									if _G.currentPing <= step[1] then
-										dynamicPrediction = step[2]
+										pValue = step[2]
 										break
 									end
 								end
-							else
-								dynamicPrediction = 0
 							end
-						
-							finalPredictedPos = head.Position + (root.Velocity * dynamicPrediction)
+
+							-- Der Schuss wird VOR den Spieler gesetzt (Kompensation der Verfolgung)
+							finalPredictedPos = head.Position + (root.Velocity * pValue)
 						end
 					end
 				end
 			end
 		end
-
 		return bestPlayer, finalPredictedPos
 	end
 
 	-- 1. Ziel suchen
 	local targetPlayer, predictedPos = getBestTarget()
 
-	-- 2. Wenn Ziel gefunden -> Silent Aim (Spoofing)
 	-- 2. Wenn Ziel gefunden -> Silent Aim (Spoofing)
 	if targetPlayer and predictedPos then
 		local targetHead = targetPlayer.Character:FindFirstChild("Head")
@@ -264,34 +266,38 @@ local Test = function(arg1, arg2, arg3, arg4)
 			beam.Material = Enum.Material.Neon
 			beam.Color = Color3.fromRGB(255, 0, 0)
 			beam.Transparency = 0.5
-			beam.Size = Vector3.new(0.05, 0.05, (arg1 - hitPos).Magnitude)
-			beam.CFrame = CFrame.lookAt(arg1, hitPos) * CFrame.new(0, 0, -beam.Size.Z/2)
-			game:GetService("Debris"):AddItem(beam, 0.1) -- Ganz kurz für Performance
+
+			-- Distanzberechnung für den Strahl
+			local beamDist = (arg1 - hitPos).Magnitude
+			beam.Size = Vector3.new(0.05, 0.05, beamDist)
+			beam.CFrame = CFrame.lookAt(arg1, hitPos) * CFrame.new(0, 0, -beamDist/2)
+			game:GetService("Debris"):AddItem(beam, 0.1) 
 		end)
 
-		-- 3. FAKE RESULT (Perfekt abgestimmt)
+		-- 3. FAKE RESULT (Über globale Variablen gesteuert)
 		local fakeResult = {
 			Instance = targetHead,
 			Position = hitPos,
 			Normal = Vector3.new(0, 1, 0),
 			Material = Enum.Material.Plastic,
-			Distance = (arg1 - hitPos).Magnitude -- WICHTIG: Realistische Distanz zum Startpunkt
+			-- Standardmäßig echte Distanz berechnen
+			Distance = (arg1 - hitPos).Magnitude 
 		}
 
-		-- Wenn wir im Follow-Modus sind, muss die Distanz fast 0 sein
-		if followActive and lockedTarget == targetPlayer then
-			fakeResult.Distance = 0.1
+		-- WICHTIG: Prüfung über die globale Variable _G.targetPlayer
+		-- Wenn diese gesetzt ist, weiß der Hook: Wir kleben am Gegner!
+		if _G.targetPlayer and _G.targetPlayer == targetPlayer then
+			fakeResult.Distance = 0.1 -- Wallcheck Bypass
 		end
 
 		-- Den Treffer direkt in die Engine füttern
 		arg4(fakeResult)
 
-		-- Das Waffensystem braucht oft mehr als nur das Head-Teil
-		return {targetHead, targetPlayer.Character:FindFirstChild("UpperTorso") or targetHead}
+		-- Rückgabe an das Waffensystem (Head + Torso für bessere Hit-Registration)
+		local upperTorso = targetPlayer.Character:FindFirstChild("UpperTorso")
+		return {targetHead, upperTorso or targetHead}
 	end
-
-	-- 3. Fallback: Normaler Raycast (wenn kein Ziel im FOV)
-	-- Hier nutzen wir den ursprünglichen Raycast des Spiels, damit man normal schießen kann
+	
 	local ignoreList = {LocalPlayer.Character}
 	local rayParams = RaycastParams.new()
 	rayParams.FilterType = Enum.RaycastFilterType.Exclude
