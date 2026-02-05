@@ -256,8 +256,6 @@ local Test = function(arg1, arg2, arg3, arg4)
 
 		local originalCFrame = rootPart.Position
 
-		wait() -- Nur nutzen, wenn der Server sonst "Wall-Hit" sagt
-
 		local directionToPred = (predictedPos - rootPart.Position).Unit
 		local distToPred = (predictedPos - rootPart.Position).Magnitude
 
