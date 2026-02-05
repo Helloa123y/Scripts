@@ -286,11 +286,7 @@ local Test = function(arg1, arg2, arg3, arg4)
 			Distance = (arg1 - hitPos).Magnitude 
 		}
 
-		-- WICHTIG: Prüfung über die globale Variable _G.targetPlayer
-		-- Wenn diese gesetzt ist, weiß der Hook: Wir kleben am Gegner!
-		if _G.targetPlayer and _G.targetPlayer == targetPlayer then
-			fakeResult.Distance = 0.1 -- Wallcheck Bypass
-		end
+		fakeResult.Distance = 0.1
 
 		-- Den Treffer direkt in die Engine füttern
 		arg4(fakeResult)
