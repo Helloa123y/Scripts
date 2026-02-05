@@ -95,11 +95,11 @@ local Test = function(arg1, arg2, arg3, arg4)
 	if targetPlayer and predictedPos then
 		local targetHead = targetPlayer.Character.Head
 		local player = game.Players.LocalPlayer
-		local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
+		local rootPart = player.Character
 		local camPos = Camera.CFrame.Position
 
-		local originalCFrame = rootPart.CFrame
-		rootPart.CFrame = targetHead.CFrame 
+		local originalCFrame = rootPart.Position
+		rootPart:MoveTo(targetHead.Position )
 		-- task.wait() -- Nur nutzen, wenn der Server sonst "Wall-Hit" sagt
 
 		local directionToPred = (predictedPos - rootPart.Position).Unit
@@ -115,7 +115,7 @@ local Test = function(arg1, arg2, arg3, arg4)
 			beam.Color = Color3.fromRGB(255, 255, 0) -- Gelb für "Bypassed"
 			beam.Transparency = 0.5
 			beam.Size = Vector3.new(0.1, 0.1, distToPred)
-			beam.CFrame = CFrame.lookAt(rootPart.Position, predictedPos) * CFrame.new(0, 0, -distToPred/2)
+			beam.CFrame = CFrame.lookAt(originalCFrame, predictedPos) * CFrame.new(0, 0, -distToPred/2)
 			game:GetService("Debris"):AddItem(beam, 0.5)
 		end)
 
@@ -132,7 +132,7 @@ local Test = function(arg1, arg2, arg3, arg4)
 		arg4(fakeResult)
 
 		-- 4. SOFORTIGER RÜCKSPRUNG
-		rootPart.CFrame = originalCFrame
+		rootPart:MoveTo(originalCFrame)
 
 		return {targetHead}
 	end
