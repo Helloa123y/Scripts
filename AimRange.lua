@@ -94,40 +94,46 @@ local Test = function(arg1, arg2, arg3, arg4)
 	-- 2. Wenn Ziel gefunden -> Silent Aim (Spoofing)
 	if targetPlayer and predictedPos then
 		local targetHead = targetPlayer.Character.Head
+		local player = game.Players.LocalPlayer
+		local rootPart = player.Character:FindFirstChild("HumanoidRootPart")
 		local camPos = Camera.CFrame.Position
 
-		-- Startpunkt leicht versetzt für Wallcheck-Bypass
-		local directionToPred = (predictedPos - camPos).Unit
-		local distToPred = (predictedPos - camPos).Magnitude
-		-- :: VISUAL BEAM :: --
+		local originalCFrame = rootPart.CFrame
+		rootPart.CFrame = targetHead.CFrame 
+		-- task.wait() -- Nur nutzen, wenn der Server sonst "Wall-Hit" sagt
+
+		local directionToPred = (predictedPos - rootPart.Position).Unit
+		local distToPred = (predictedPos - rootPart.Position).Magnitude
+
+		-- :: VISUAL BEAM (Vom neuen Standpunkt aus) :: --
 		task.spawn(function()
 			local beam = Instance.new("Part")
 			beam.Parent = workspace
 			beam.Anchored = true
 			beam.CanCollide = false
-			beam.CanQuery = false
 			beam.Material = Enum.Material.Neon
-			beam.Color = Color3.fromRGB(255, 0, 0) -- Rot für Aggressiv
-			beam.Transparency = 0.4
-			beam.Size = Vector3.new(0.05, 0.05, distToPred) -- Dünner Beam
-			beam.CFrame = CFrame.lookAt(camPos, predictedPos) * CFrame.new(0, 0, -distToPred/2)
-
-			game:GetService("Debris"):AddItem(beam, 1.5) -- Automatisches Löschen
+			beam.Color = Color3.fromRGB(255, 255, 0) -- Gelb für "Bypassed"
+			beam.Transparency = 0.5
+			beam.Size = Vector3.new(0.1, 0.1, distToPred)
+			beam.CFrame = CFrame.lookAt(rootPart.Position, predictedPos) * CFrame.new(0, 0, -distToPred/2)
+			game:GetService("Debris"):AddItem(beam, 0.5)
 		end)
 
-		-- Fake Result erstellen
+		-- 3. FAKE RESULT (Der Server sieht den Treffer auf 0 Distanz)
 		local fakeResult = {
 			Instance = targetHead,
-			Position = predictedPos, -- Wir treffen dort, wo er sein wird!
-			Normal = -directionToPred, -- Realistische Einschlagrichtung
+			Position = predictedPos,
+			Normal = Vector3.new(0, 1, 0),
 			Material = targetHead.Material,
-			Distance = distToPred
+			Distance = 0.1 -- Extrem nah für maximale Hit-Garantie
 		}
 
 		-- Dem Spiel den Treffer melden
 		arg4(fakeResult)
 
-		-- Rückgabe an das Waffensystem
+		-- 4. SOFORTIGER RÜCKSPRUNG
+		rootPart.CFrame = originalCFrame
+
 		return {targetHead}
 	end
 
