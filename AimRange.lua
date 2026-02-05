@@ -203,7 +203,7 @@ local Test = function(arg1, arg2, arg3, arg4)
 
 				-- 2. FOV Check (Bildschirm)
 				local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
-				if onScreen then
+				if onScreen or _G.targetPlayer then
 					local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
 
 					if distToMouse <= _G.Config.FOVRadius or _G.targetPlayer then
