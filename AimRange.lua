@@ -166,7 +166,7 @@ RunService.Heartbeat:Connect(function()
 		-- 2. Teleport ausführen (Target-Lock)
 		local targetRoot = lockedTarget.Character:FindFirstChild("HumanoidRootPart")
 		if targetRoot and myRoot then
-			myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 3)
+			myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 0)
 			myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 		end
 	end
@@ -221,7 +221,12 @@ local Test = function(arg1, arg2, arg3, arg4)
 						if score < bestScore then
 							bestScore = score
 							bestPlayer = plr
+		
 							local dynamicPrediction = _G.Config.DefaultPrediction
+							if _G.targetPlayer then
+								dynamicPrediction = dynamicPrediction + 0.15 -- Der "Latency-Vorstoß"
+							end
+							
 							if _G.Config.UsePrediction then
 								for _, step in ipairs(_G.Config.PingPredictionTable) do
 									if _G.currentPing <= step[1] then
