@@ -20,6 +20,133 @@ task.spawn(function()
 	end
 end)
 
+
+
+
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local LocalPlayer = game.Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+-- Flag für den Rechtsklick-Status
+local isRightClicking = false
+local preTeleportCFrame = nil -- Hier speichern wir den Rücksprung-Punkt
+
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+
+	if input.UserInputType == Enum.UserInputType.MouseButton2 then -- Rechtsklick gedrückt
+		local char = game.Players.LocalPlayer.Character
+		local root = char and char:FindFirstChild("HumanoidRootPart")
+
+		if root then
+			-- 1. POSITION MERKEN (Bevor der Teleport startet)
+			preTeleportCFrame = root.CFrame
+			isRightClicking = true
+		end
+	end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton2 then -- Rechtsklick losgelassen
+		isRightClicking = false
+
+		local char = game.Players.LocalPlayer.Character
+		local root = char and char:FindFirstChild("HumanoidRootPart")
+
+		-- 2. RÜCKSPRUNG ZUR ALTEN POSITION
+		if root and preTeleportCFrame then
+			root.CFrame = preTeleportCFrame
+			root.AssemblyLinearVelocity = Vector3.new(0, 0, 0) -- Stoppt Bewegung
+			preTeleportCFrame = nil
+		end
+	end
+end)
+
+
+local function getBestTarget()
+	local bestPlayer = nil
+	local bestScore = math.huge
+	local finalPredictedPos = nil
+
+	local mousePos = Vector2.new(Camera.ViewportSize.X / 2, Camera.ViewportSize.Y / 2)
+
+	for _, plr in ipairs(game.Players:GetPlayers()) do
+		if plr == LocalPlayer or table.find(_G.Withelist or {}, plr.Name) then continue end
+
+		local char = plr.Character
+		local head = char and char:FindFirstChild("Head")
+		local hum = char and char:FindFirstChild("Humanoid")
+		local root = char and char:FindFirstChild("HumanoidRootPart")
+
+		if head and hum and root and hum.Health > 0 then
+
+			-- 1. Distanz Check (Welt)
+			local distToPlayer = (root.Position - Camera.CFrame.Position).Magnitude
+			if distToPlayer > _G.Config.MaxDistance then continue end
+
+			-- 2. FOV Check (Bildschirm)
+			local screenPos, onScreen = Camera:WorldToViewportPoint(head.Position)
+			if onScreen then
+				local distToMouse = (Vector2.new(screenPos.X, screenPos.Y) - mousePos).Magnitude
+
+				if distToMouse <= _G.Config.FOVRadius then
+
+					-- :: DAS SCORING SYSTEM :: --
+					-- Wir kombinieren Maus-Nähe und Distanz zum Gegner.
+					-- Score = (MausAbstand) + (WeltAbstand * Gewichtung)
+					local score = distToMouse + (distToPlayer * _G.Config.DistanceWeight)
+
+					-- HP Logik: Leichte Strafe für Low HP, aber kein Ausschluss!
+					if _G.Config.AvoidLowHP and hum.Health < _G.Config.LowHPThreshold then
+						score = score + _G.Config.LowHPPenalty
+					end
+
+					if score < bestScore then
+						bestScore = score
+						bestPlayer = plr
+						local dynamicPrediction = _G.Config.DefaultPrediction
+						if _G.Config.UsePrediction then
+							for _, step in ipairs(_G.Config.PingPredictionTable) do
+								if _G.currentPing <= step[1] then
+									dynamicPrediction = step[2]
+									break
+								end
+							end
+						else
+							dynamicPrediction = 0
+						end
+
+						finalPredictedPos = head.Position + (root.Velocity * dynamicPrediction)
+					end
+				end
+			end
+		end
+	end
+
+	return bestPlayer, finalPredictedPos
+end
+
+-- Der Loop, der dich beim Gegner hält
+RunService.Heartbeat:Connect(function()
+	if isRightClicking then
+		-- Nutzt deine getBestTarget Funktion aus dem restlichen Script
+		local targetPlayer, predictedPos = getBestTarget()
+
+		if targetPlayer and targetPlayer.Character then
+			local targetHead = targetPlayer.Character:FindFirstChild("Head")
+			local myChar = game.Players.LocalPlayer.Character
+			local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+
+			if targetHead and myRoot then
+				-- Teleport zum Gegner (3 Studs dahinter für Treffer-Garantie)
+				myRoot.CFrame = targetHead.CFrame * CFrame.new(0, 0, 3)
+				myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			end
+		end
+	end
+end)
+
+
 local Test = function(arg1, arg2, arg3, arg4)
 	local Camera = workspace.CurrentCamera
 	local LocalPlayer = game.Players.LocalPlayer
@@ -100,7 +227,7 @@ local Test = function(arg1, arg2, arg3, arg4)
 		local camPos = Camera.CFrame.Position
 
 		local originalCFrame = rootPart.Position
-		char:MoveTo(targetHead.Position )
+
 		wait() -- Nur nutzen, wenn der Server sonst "Wall-Hit" sagt
 
 		local directionToPred = (predictedPos - rootPart.Position).Unit
@@ -131,9 +258,6 @@ local Test = function(arg1, arg2, arg3, arg4)
 
 		-- Dem Spiel den Treffer melden
 		arg4(fakeResult)
-
-		-- 4. SOFORTIGER RÜCKSPRUNG
-		char:MoveTo(originalCFrame)
 
 		return {targetHead}
 	end
