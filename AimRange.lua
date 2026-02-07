@@ -326,7 +326,7 @@ end
 
 local old = require(game.ReplicatedStorage.Modules.Core.Util).all_parts_on_ray
 print("Yes")
-hookfunction(old, Test)
+--hookfunction(old, Test)
 
 
 local OldFunction = require(game.ReplicatedStorage.Modules.Game.ItemTypes.Melee).get_hit_players
