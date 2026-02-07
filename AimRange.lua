@@ -217,16 +217,13 @@ local Test = function(arg1, arg2, arg3, arg4)
 						if _G.Config.AvoidLowHP and hum.Health < _G.Config.LowHPThreshold then
 							score = score + _G.Config.LowHPPenalty
 						end
-					
+
 						if score < bestScore then
 							bestScore = score
 							bestPlayer = plr
-		
+
 							local dynamicPrediction = _G.Config.DefaultPrediction
-							if _G.targetPlayer then
-								dynamicPrediction = dynamicPrediction + 0.15 -- Der "Latency-Vorstoß"
-							end
-							
+
 							if _G.Config.UsePrediction then
 								for _, step in ipairs(_G.Config.PingPredictionTable) do
 									if _G.currentPing <= step[1] then
@@ -237,7 +234,11 @@ local Test = function(arg1, arg2, arg3, arg4)
 							else
 								dynamicPrediction = 0
 							end
-						
+							
+							if _G.targetPlayer then
+								dynamicPrediction = dynamicPrediction + 0.15 -- Der "Latency-Vorstoß"
+							end
+							
 							finalPredictedPos = head.Position + (root.Velocity * dynamicPrediction)
 						end
 					end
@@ -322,9 +323,10 @@ local Test = function(arg1, arg2, arg3, arg4)
 	return {}
 end
 
+
 local old = require(game.ReplicatedStorage.Modules.Core.Util).all_parts_on_ray
 print("Yes")
---hookfunction(old, Test)
+hookfunction(old, Test)
 
 
 local OldFunction = require(game.ReplicatedStorage.Modules.Game.ItemTypes.Melee).get_hit_players
