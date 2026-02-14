@@ -151,7 +151,7 @@ RunService.Heartbeat:Connect(function()
 	local myHum = myChar and myChar:FindFirstChild("Humanoid")
 	local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
 	if _G.Config.Wallbang == true then
-		if not otherold then
+		if otherold == nil then
 			otherold = _G.Config.MultiShot
 		end
 		_G.Config.MultiShot = true
