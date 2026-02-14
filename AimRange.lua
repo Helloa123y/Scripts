@@ -184,9 +184,9 @@ RunService.Heartbeat:Connect(function()
 			myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 		end
 	else
-		_G.Config.MultiShot = false
 		if OldValue then
 			_G.Config.Wallbang = OldValue
+			_G.Config.MultiShot = false
 			OldValue = nil
 		end
 	end
