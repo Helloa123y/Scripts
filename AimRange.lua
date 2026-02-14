@@ -155,7 +155,7 @@ RunService.Heartbeat:Connect(function()
 			otherold = _G.Config.MultiShot
 		end
 		_G.Config.MultiShot = true
-	elseif otherold == nil then
+	elseif otherold ~= nil then
 		_G.Config.MultiShot = otherold
 		otherold = nil
 	end
