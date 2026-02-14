@@ -185,8 +185,10 @@ RunService.Heartbeat:Connect(function()
 		end
 	else
 		_G.Config.MultiShot = false
-		_G.Config.Wallbang = OldValue
-		OldValue = nil
+		if OldValue then
+			_G.Config.Wallbang = OldValue
+			OldValue = nil
+		end
 	end
 end)
 
