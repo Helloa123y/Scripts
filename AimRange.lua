@@ -144,11 +144,20 @@ UserInputService.InputBegan:Connect(function(input, gameProcessed)
 end)
 
 -- Haupt-Loop
+local OldValue = nil
+local otherold = nil
 RunService.Heartbeat:Connect(function()
 	local myChar = game.Players.LocalPlayer.Character
 	local myHum = myChar and myChar:FindFirstChild("Humanoid")
 	local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
-
+	if _G.Config.Wallbang == true then
+		if not otherold then
+			otherold = _G.Config.MultiShot
+		end
+		_G.Config.MultiShot = true
+	elseif otherold then
+		_G.Config.MultiShot = otherold
+	end
 	-- 1. Abbruch-Bedingungen prüfen
 	if followActive then
 		-- Wenn ich selbst low HP bin oder sterbe
@@ -166,9 +175,18 @@ RunService.Heartbeat:Connect(function()
 		-- 2. Teleport ausführen (Target-Lock)
 		local targetRoot = lockedTarget.Character:FindFirstChild("HumanoidRootPart")
 		if targetRoot and myRoot then
+			_G.Config.MultiShot = true
+			if not OldValue then
+				OldValue = _G.Config.Wallbang
+			end
+			_G.Config.Wallbang = false
 			myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 0, 0)
 			myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 		end
+	else
+		_G.Config.MultiShot = false
+		_G.Config.Wallbang = OldValue
+		OldValue = nil
 	end
 end)
 
