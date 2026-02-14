@@ -155,8 +155,9 @@ RunService.Heartbeat:Connect(function()
 			otherold = _G.Config.MultiShot
 		end
 		_G.Config.MultiShot = true
-	elseif otherold then
+	elseif otherold == nil then
 		_G.Config.MultiShot = otherold
+		otherold = nil
 	end
 	-- 1. Abbruch-Bedingungen prüfen
 	if followActive then
@@ -184,7 +185,7 @@ RunService.Heartbeat:Connect(function()
 			myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
 		end
 	else
-		if OldValue then
+		if OldValue ~= nil then
 			_G.Config.Wallbang = OldValue
 			_G.Config.MultiShot = false
 			OldValue = nil
